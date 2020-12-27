@@ -1,7 +1,7 @@
 import type { Event } from '../events/event';
 import { EventQueue } from '../events/event-queue';
 import { Entity } from './entity';
-import { UUID } from './uuid';
+import { Identifier } from './identifier';
 
 /**
  * Aggregate root
@@ -14,9 +14,10 @@ export abstract class AggregateRoot<
   E extends string = string
 > extends Entity<T> {
   protected createCreatedEvent?(): Event<E>;
+
   public readonly events = new EventQueue<E>();
 
-  public constructor(props: T, id?: UUID) {
+  public constructor(props: T, id?: Identifier) {
     super(props, id);
 
     if (!id && this.createCreatedEvent) {

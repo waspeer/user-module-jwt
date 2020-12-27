@@ -1,9 +1,9 @@
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
 
 /**
  * UUID class
  */
-export class UUID {
+export class Identifier {
   readonly value: string;
 
   /**
@@ -16,17 +16,17 @@ export class UUID {
    * @param {[string]} id - The ID
    */
   constructor(id?: string) {
-    this.value = id || uuidv4();
+    this.value = id || nanoid();
   }
 
   /**
    * Determines if the passed UUID is the equal to this UUID
    *
-   * @param {UUID} id
+   * @param {Identifier} id
    * @returns {boolean}
    */
-  public equals(id: UUID) {
-    if (!(id instanceof UUID)) {
+  public equals(id: Identifier) {
+    if (!(id instanceof Identifier)) {
       return false;
     }
 

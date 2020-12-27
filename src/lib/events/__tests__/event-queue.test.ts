@@ -1,4 +1,4 @@
-import { UUID } from '../../domain/uuid';
+import { Identifier } from '../../domain/identifier';
 import type { Event } from '../event';
 import { EventQueue } from '../event-queue';
 
@@ -11,7 +11,7 @@ class TestEvent implements Event<'test.event', boolean> {
   public readonly type = 'test.event';
 
   constructor() {
-    this.aggregateId = new UUID().value;
+    this.aggregateId = new Identifier().value;
     this.createdAt = new Date();
     this.payload = true;
   }
