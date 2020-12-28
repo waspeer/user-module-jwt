@@ -1,13 +1,12 @@
 import { EventEmitter } from 'events';
 import type { Logger } from '../logger';
-import type { Event } from './event';
-import type { Listener } from './listener';
+import type { DomainEventEmitter, Event, Listener } from './types';
 
 interface Dependencies {
   logger: Logger;
 }
 
-export class DomainEventEmitter<T extends string> {
+export class NodeDomainEventEmitter<T extends string> implements DomainEventEmitter<T> {
   private readonly emitter: EventEmitter;
   private readonly logger: Logger;
 

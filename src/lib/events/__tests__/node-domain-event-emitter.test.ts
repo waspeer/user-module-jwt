@@ -1,5 +1,6 @@
-import { DomainEventEmitter } from '../domain-event-emitter';
-import { Event } from '../event';
+import { NodeDomainEventEmitter } from '../node-domain-event-emitter';
+import type { Event } from '../types';
+import { Identifier } from '~lib/domain/identifier';
 
 const mockLogger = {
   debug: jest.fn(),
@@ -17,17 +18,21 @@ jest.mock('events', () => ({
   EventEmitter: jest.fn(() => mockEventEmitter),
 }));
 
-const emitter = new DomainEventEmitter({ logger: mockLogger });
+const emitter = new NodeDomainEventEmitter({ logger: mockLogger });
 
 const createFakeEvent = (): Event => {
   const unique = Date.now().toString();
 
-  return {
+  const fakeEvent: Event = {
+    id: new Identifier(),
+    aggregateId: new Identifier(),
+    occurredAt: new Date(),
+    payload: 'payload',
     type: `${unique}-type`,
-    aggregateId: `${unique}-id`,
-    createdAt: new Date(),
-    payload: {},
+    serializePayload: () => 'payload',
   };
+
+  return fakeEvent;
 };
 
 describe('DomainEventEmitter', () => {

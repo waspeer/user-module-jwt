@@ -1,4 +1,4 @@
-import type { Event } from './event';
+import type { Event } from './types';
 
 export class EventQueue<T extends string> {
   private events: Event<T>[] = [];

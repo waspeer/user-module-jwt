@@ -9,8 +9,10 @@ module.exports = {
     'import/order': ['error', { alphabetize: { order: 'asc', caseInsensitive: true } }],
     'import/prefer-default-export': 'off',
     'lines-between-class-members': ['error', 'always', { exceptAfterSingleLine: true }],
+    'no-underscore-dangle': ['error', { allowAfterThis: true }],
     'no-empty-function': 'off',
     'no-useless-constructor': 'off',
+    'no-shadow': 'off',
     'react/static-property-placement': 'off',
   },
 };

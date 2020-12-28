@@ -1,11 +1,11 @@
-import type { DomainEventEmitter } from './domain-event-emitter';
-import type { Event } from './event';
+import { DomainEventEmitter } from './types';
+import type { Event, Listener as IListener } from './types';
 
 interface Dependencies<T extends string> {
   domainEventEmitter: DomainEventEmitter<T>;
 }
 
-export abstract class Listener<T extends Event> {
+export abstract class Listener<T extends Event> implements IListener<T> {
   abstract readonly eventType: T['type'];
 
   private readonly domainEventEmitter: DomainEventEmitter<T['type']>;

@@ -1,5 +1,5 @@
-import type { Event } from '../events/event';
 import { EventQueue } from '../events/event-queue';
+import type { Event } from '../events/types';
 import { Entity } from './entity';
 import { Identifier } from './identifier';
 

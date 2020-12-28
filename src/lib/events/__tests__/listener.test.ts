@@ -1,5 +1,7 @@
-import type { Event } from '../event';
+/* eslint-disable max-classes-per-file */
 import { Listener } from '../listener';
+import { Event } from '../types';
+import { Identifier } from '~lib/domain/identifier';
 
 const mockDomainEventEmitter = {
   emit: jest.fn(),
@@ -7,10 +9,12 @@ const mockDomainEventEmitter = {
 };
 
 const fakeEvent: Event = {
-  aggregateId: 'id',
-  createdAt: new Date(),
+  id: new Identifier('id'),
+  aggregateId: new Identifier('id'),
+  occurredAt: new Date(),
   payload: 'payload',
   type: 'fake.event',
+  serializePayload: () => 'payload',
 };
 
 class FakeListener extends Listener<typeof fakeEvent> {

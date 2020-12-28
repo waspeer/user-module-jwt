@@ -1,27 +1,29 @@
 import { Identifier } from '../../domain/identifier';
-import type { Event } from '../event';
 import { EventQueue } from '../event-queue';
+import type { Event } from '../types';
 
 const queue = new EventQueue();
 
-class TestEvent implements Event<'test.event', boolean> {
-  public readonly aggregateId: string;
-  public readonly createdAt: Date;
-  public readonly payload: boolean;
-  public readonly type = 'test.event';
+const createFakeEvent = (): Event => {
+  const unique = Date.now().toString();
 
-  constructor() {
-    this.aggregateId = new Identifier().value;
-    this.createdAt = new Date();
-    this.payload = true;
-  }
-}
+  const fakeEvent: Event = {
+    id: new Identifier(),
+    aggregateId: new Identifier(),
+    occurredAt: new Date(),
+    payload: 'payload',
+    type: `${unique}-type`,
+    serializePayload: () => 'payload',
+  };
+
+  return fakeEvent;
+};
 
 describe('EventQueue', () => {
   describe('.add', () => {
     it('should add a new event to the queue', () => {
-      const event1 = new TestEvent();
-      const event2 = new TestEvent();
+      const event1 = createFakeEvent();
+      const event2 = createFakeEvent();
 
       queue.add(event1);
       expect(queue.all).toEqual([event1]);
