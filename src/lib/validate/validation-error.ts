@@ -1,7 +1,6 @@
-import { Error } from '../errors/error';
-
-export class ValidationError extends Error {
+export class ValidationError extends TypeError {
   public constructor(message: string) {
-    super(message, ValidationError);
+    super(message);
+    this.name = 'ValidationError';
   }
 }

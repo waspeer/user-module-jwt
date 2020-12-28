@@ -1,8 +1,10 @@
-import { SignUpCommand } from '../../src/application/commands/sign-up-command';
+import { SignUpCommand } from '../../src/application/commands/sign-up/sign-up-command';
+import { UsernameAlreadyTakenError } from '../../src/application/commands/sign-up/sign-up-errors';
 import { User } from '../../src/domain/entity/user';
 import { UserCreatedEvent } from '../../src/event/user-created-event';
 import { createMockDomainEventEmitter } from '../util/create-mock-domain-event-emitter';
 import { createMockUserRepository } from '../util/create-mock-user-repository';
+import { createUser } from '../util/create-user';
 import { Event } from '~lib/events/types';
 
 const mockDomainEventEmitter = createMockDomainEventEmitter();
@@ -13,11 +15,16 @@ const command = new SignUpCommand({
 });
 
 describe('Sign Up Command', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('should store a new user entity and dispatch a created event', async () => {
     const username = 'username';
     const password = 'password';
 
-    await expect(command.execute({ username, password })).resolves.toBeUndefined();
+    mockUserRepository.findByUsername.mockResolvedValueOnce(undefined);
+    await expect(command.execute({ username, password })).toResolve();
 
     // should be stored
     expect(mockUserRepository.store).toHaveBeenCalledWith(expect.any(User));
@@ -41,5 +48,14 @@ describe('Sign Up Command', () => {
     expect(mockUserRepository.store).toHaveBeenCalledBefore(mockDomainEventEmitter.emit);
   });
 
-  // TODO should throw an error when username is already taken
+  it('should throw an error when username is already taken', async () => {
+    const user = createUser();
+    const username = user.username.value;
+    const password = user.password.value;
+
+    mockUserRepository.findByUsername.mockResolvedValueOnce(user);
+    await expect(command.execute({ username, password })).rejects.toBeInstanceOf(
+      UsernameAlreadyTakenError,
+    );
+  });
 });

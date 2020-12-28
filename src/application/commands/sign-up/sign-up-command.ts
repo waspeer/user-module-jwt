@@ -1,12 +1,12 @@
-import { User } from '../../domain/entity/user';
-import { UserRepository } from '../../domain/repository/user-repository';
-import { Password } from '../../domain/value-object/password';
-import { Username } from '../../domain/value-object/username';
-import { UserDomainEventEmitter } from '../../event/event-types';
-import { UsernameAlreadyTakenError } from '../errors/username-already-taken-error';
+import { User } from '../../../domain/entity/user';
+import { UserRepository } from '../../../domain/repository/user-repository';
+import { Password } from '../../../domain/value-object/password';
+import { Username } from '../../../domain/value-object/username';
+import { UserDomainEventEmitter } from '../../../event/event-types';
+import { UsernameAlreadyTakenError } from './sign-up-errors';
 import { Feature } from '~lib/application/feature';
 
-interface SignUpCommandProps {
+interface Dependencies {
   domainEventEmitter: UserDomainEventEmitter;
   userRepository: UserRepository;
 }
@@ -20,7 +20,7 @@ export class SignUpCommand implements Feature<SignUpCommandArguments, void> {
   private readonly domainEventEmitter: UserDomainEventEmitter;
   private readonly userRepository: UserRepository;
 
-  public constructor({ domainEventEmitter, userRepository }: SignUpCommandProps) {
+  public constructor({ domainEventEmitter, userRepository }: Dependencies) {
     this.domainEventEmitter = domainEventEmitter;
     this.userRepository = userRepository;
   }
