@@ -1,4 +1,4 @@
-# User Module JWT
+\*\*\*\*# User Module JWT
 
 This is a module for user management/authentication. This is made for educational purposes.
 
@@ -10,38 +10,45 @@ This is a module for user management/authentication. This is made for educationa
 -   [ ] A user can invalidate its refresh token (sign out)
 -   [ ] The user information of the currently logged in user can be queried (get user by refresh token)
 
-
 ```mermaid
 classDiagram
 
-Token <|-- AccessToken
-Token <|-- RefreshToken
-User "1" --> "0..1" RefreshToken
+Token <|-- AccessToken: implements
+Token <|-- RefreshToken: implements
+User "1" --> "*" RefreshToken
+RefreshToken "1" --> "1" Device
 
 class User {
   <<aggregate>>
   string username
   string password
 
-  refreshTokens() UserTokens
-  signIn() UserTokens
+  createAccessToken(RefreshToken refreshToken) AccessToken
+  signIn(string password) RefreshToken
   signOut() void
 }
 
 class Token {
-  <<abstract>>
+  <<interface>>
   string value
   date expiresAt
 
   isValid() boolean
 }
 class AccessToken
-class RefreshToken
+class RefreshToken {
+  Device device
+}
 
 class UserTokens {
   <<interface>>
   AccessToken accessToken
   RefreshToken refreshToken
+}
+
+class Device {
+  string ipAddress
+  string userAgent
 }
 ```
 
@@ -54,31 +61,40 @@ subgraph "Sign Up"
   su3["UserCreated"]:::event
 end
 
-subgraph "Sign In (refresh token exists)"
-  sr1["Sign In"]:::command -->
-  sr2["Check if user already has refresh token"]:::policy -- "yes" -->
-  sr3["Create new access token + update expiry of refresh token"]:::policy -->
-  sr4["UserTokenRefreshed"]:::event
+subgraph "Sign In (no refresh token)"
+  s4["UserAccessTokenCreated"]:::event
+  s5["UserRefreshTokenCreated"]:::event
+
+  s1["Sign In"]:::command -->
+  s2["Check if user already has refresh token for device"]:::policy -- "no" -->
+  s3["Create new access token + refresh token"]:::policy -->
+  s4 & s5
 end
 
-subgraph "Sign In (no refresh token)"
-  s1["Sign In"]:::command -->
-  s2["Check if user already has refresh token"]:::policy -- "no" -->
-  s3["Create new access token + refresh token"]:::policy -->
-  s4["UserSignedIn"]:::event
+subgraph "Sign In (refresh token exists)"
+  sr4["UserAccessTokenCreated"]:::event
+  sr5["UserRefreshTokenExtended"]:::event
+
+  sr1["Sign In"]:::command -->
+  sr2["Check if user already has refresh token for device"]:::policy -- "yes" -->
+  sr3["Create new access token + update expiry of refresh token"]:::policy -->
+  sr4 & sr5
 end
 
 subgraph "Refresh Token"
+  r4["UserAccessTokenCreated"]:::event
+  r5["UserRefreshTokenExtended"]:::event
+
   r1["Refresh Token"]:::command -->
   r2["Check if provided refresh token is valid"]:::policy -- "valid" -->
   r3["Create new access token + update expiry of refresh token"]:::policy -->
-  r4["UserTokenRefreshed"]:::event
+  r4 & r5
 end
 
 subgraph "Sign Out"
   so1["Sign Out"]:::command -->
   so2["Check if provided refresh token is valid"]:::policy -- "valid" -->
-  so3["UserSignedOut"]:::event
+  so3["RefreshTokenInvalidated"]:::event
 end
 
 classDef command fill:steelblue
