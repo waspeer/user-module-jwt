@@ -1,9 +1,7 @@
 import assert from 'assert';
 import { UserEventTypes } from '../../event/event-types';
-import { UserAccessTokenCreatedEvent } from '../../event/user-access-token-created-event';
 import { UserCreatedEvent } from '../../event/user-created-event';
-import { UserRefreshTokenCreatedEvent } from '../../event/user-refresh-token-created-event';
-import { UserRefreshTokenExtendedEvent } from '../../event/user-refresh-token-extended-event';
+import { UserSignedInEvent } from '../../event/user-signed-in-event';
 import { AccessToken } from '../value-object/access-token';
 import { Password } from '../value-object/password';
 import { Username } from '../value-object/username';
@@ -43,10 +41,7 @@ export class User extends AggregateRoot<UserProps, UserEventTypes> {
 
     assert(refreshToken, 'Unable to create AccessToken: could not find RefreshToken');
 
-    const accessToken = new AccessToken({ user: this });
-    this.events.add(new UserAccessTokenCreatedEvent(this, accessToken));
-
-    return accessToken;
+    return new AccessToken({ user: this });
   }
 
   public findRefreshTokenForDevice(device: Device) {
@@ -56,20 +51,20 @@ export class User extends AggregateRoot<UserProps, UserEventTypes> {
   public signIn({ password, device }: { password: string; device: Device }) {
     assert(this.password.equals(password), 'Unable to sign in: invalid credentials');
 
+    let refreshToken: RefreshToken;
     const existingRefreshToken = this.findRefreshTokenForDevice(device);
 
     if (existingRefreshToken) {
-      existingRefreshToken.extend();
-
-      this.events.add(new UserRefreshTokenExtendedEvent(this, existingRefreshToken));
+      refreshToken = existingRefreshToken;
+      refreshToken.extend();
     } else {
-      const refreshToken = new RefreshToken({ device });
-
+      refreshToken = new RefreshToken({ device });
       this.props.refreshTokens.push(refreshToken);
-      this.events.add(new UserRefreshTokenCreatedEvent(this, refreshToken));
     }
 
-    this.createAccessTokenForDevice(device);
+    const accessToken = this.createAccessTokenForDevice(device);
+
+    this.events.add(new UserSignedInEvent(this, { accessToken, refreshToken }));
   }
 
   protected createCreatedEvent() {

@@ -22,7 +22,6 @@ export class AccessToken extends ValueObject<string> {
 
   public constructor({ user }: AccessTokenConstructorProps) {
     const expiresAt = new Date(Date.now() + AccessToken.LIFETIME);
-
     const token = jwt.sign(
       {
         exp: Math.floor(expiresAt.getTime() / 1000),

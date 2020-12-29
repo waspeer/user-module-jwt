@@ -1,6 +1,4 @@
-import { UserAccessTokenCreatedEvent } from '../../../src/event/user-access-token-created-event';
-import { UserRefreshTokenCreatedEvent } from '../../../src/event/user-refresh-token-created-event';
-import { UserRefreshTokenExtendedEvent } from '../../../src/event/user-refresh-token-extended-event';
+import { UserSignedInEvent } from '../../../src/event/user-signed-in-event';
 import { createDevice } from '../../util/create-device';
 import { createRefreshToken } from '../../util/create-refresh-token';
 import { createUser } from '../../util/create-user';
@@ -23,10 +21,7 @@ describe('User', () => {
       expect(user.refreshTokens).toBeEmpty();
       expect(() => user.signIn({ password, device })).not.toThrowError();
       expect(user.refreshTokens).not.toBeEmpty();
-      expect(user.events.all).toIncludeAllMembers([
-        expect.any(UserRefreshTokenCreatedEvent),
-        expect.any(UserAccessTokenCreatedEvent),
-      ]);
+      expect(user.events.all).toIncludeAllMembers([expect.any(UserSignedInEvent)]);
     });
 
     it('should extend a token when it matches to provided device instead of creating a new one', () => {
@@ -38,10 +33,7 @@ describe('User', () => {
       expect(user.refreshTokens).toHaveLength(1);
       expect(() => user.signIn({ password, device })).not.toThrowError();
       expect(user.refreshTokens).toHaveLength(1);
-      expect(user.events.all).toIncludeAllMembers([
-        expect.any(UserRefreshTokenExtendedEvent),
-        expect.any(UserAccessTokenCreatedEvent),
-      ]);
+      expect(user.events.all).toIncludeAllMembers([expect.any(UserSignedInEvent)]);
     });
   });
 
@@ -59,15 +51,6 @@ describe('User', () => {
       const user = createUser();
 
       expect(() => user.createAccessTokenForDevice(device)).toThrowError();
-    });
-
-    it('should queue a UserAccessTokenCreated event', () => {
-      const refreshToken = createRefreshToken();
-      const user = createUser({ refreshTokens: [refreshToken] });
-      const { device } = refreshToken;
-
-      expect(() => user.createAccessTokenForDevice(device)).not.toThrowError();
-      expect(user.events.all).toIncludeAllMembers([expect.any(UserAccessTokenCreatedEvent)]);
     });
   });
 });

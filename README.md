@@ -62,33 +62,24 @@ subgraph "Sign Up"
 end
 
 subgraph "Sign In (no refresh token)"
-  s4["UserAccessTokenCreated"]:::event
-  s5["UserRefreshTokenCreated"]:::event
-
   s1["Sign In"]:::command -->
   s2["Check if user already has refresh token for device"]:::policy -- "no" -->
   s3["Create new access token + refresh token"]:::policy -->
-  s4 & s5
+  s6["UserSignedIn"]:::event
 end
 
 subgraph "Sign In (refresh token exists)"
-  sr4["UserAccessTokenCreated"]:::event
-  sr5["UserRefreshTokenExtended"]:::event
-
   sr1["Sign In"]:::command -->
   sr2["Check if user already has refresh token for device"]:::policy -- "yes" -->
   sr3["Create new access token + update expiry of refresh token"]:::policy -->
-  sr4 & sr5
+  sr6["UserSignedIn"]:::event
 end
 
 subgraph "Refresh Token"
-  r4["UserAccessTokenCreated"]:::event
-  r5["UserRefreshTokenExtended"]:::event
-
   r1["Refresh Token"]:::command -->
   r2["Check if provided refresh token is valid"]:::policy -- "valid" -->
   r3["Create new access token + update expiry of refresh token"]:::policy -->
-  r4 & r5
+  r4["UserAccessTokenRefreshed"]:::event
 end
 
 subgraph "Sign Out"
@@ -101,3 +92,8 @@ classDef command fill:steelblue
 classDef event fill:gold,color:black
 classDef policy fill:pink,color:black
 ```
+
+## Todo's
+
+-   [ ] Make all events serializable by default - remove serializePayload methods
+-   [ ] Make all domain errors custom so they can be catched in application layer

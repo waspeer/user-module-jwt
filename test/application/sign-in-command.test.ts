@@ -4,9 +4,7 @@ import { SignInCommand } from '../../src/application/command/sign-in/sign-in-com
 import { UserNotFoundError } from '../../src/application/command/sign-in/sign-in-errors';
 import { RefreshToken } from '../../src/domain/entity/refresh-token';
 import { User } from '../../src/domain/entity/user';
-import { AccessToken } from '../../src/domain/value-object/access-token';
-import { UserAccessTokenCreatedEvent } from '../../src/event/user-access-token-created-event';
-import { UserRefreshTokenCreatedEvent } from '../../src/event/user-refresh-token-created-event';
+import { UserSignedInEvent } from '../../src/event/user-signed-in-event';
 import { createDevice } from '../util/create-device';
 import { createMockDomainEventEmitter } from '../util/create-mock-domain-event-emitter';
 import { createMockUserRepository } from '../util/create-mock-user-repository';
@@ -52,24 +50,21 @@ describe('Sign In Command', () => {
     expect(storedUser.id.equals(user.id)).toBeTrue();
     expect(storedRefreshToken).toBeInstanceOf(RefreshToken);
 
-    // should dispatch UserRefreshTokenCreatedEvent and UserAccessTokenCreatedEvent
+    // should dispatch the appropriate events
     expect(mockDomainEventEmitter.emit).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.any(UserRefreshTokenCreatedEvent),
-        expect.any(UserAccessTokenCreatedEvent),
-      ]),
+      expect.arrayContaining([expect.any(UserSignedInEvent)]),
     );
 
     const emittedEvents: any[] = mockDomainEventEmitter.emit.mock.calls[0][0];
-    const refreshTokenEvent: UserRefreshTokenCreatedEvent = emittedEvents.find(
-      (event) => event instanceof UserRefreshTokenCreatedEvent,
-    );
-    const accessTokenEvent: UserAccessTokenCreatedEvent = emittedEvents.find(
-      (event) => event instanceof UserAccessTokenCreatedEvent,
+    const signInEvent: UserSignedInEvent = emittedEvents.find(
+      (event) => event instanceof UserSignedInEvent,
     );
 
-    expect(refreshTokenEvent.payload.refreshToken).toBe(storedRefreshToken);
-    expect(accessTokenEvent.payload.accessToken).toBeInstanceOf(AccessToken);
+    expect(signInEvent.payload).toEqual<UserSignedInEvent['payload']>({
+      accessToken: expect.any(String),
+      deviceId: storedRefreshToken.device.id.value,
+      refreshToken: storedRefreshToken.value,
+    });
   });
 
   it('should throw an error when user can not be found', async () => {
