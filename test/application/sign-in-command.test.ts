@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import faker from 'faker';
-import { SignInCommand } from '../../src/application/commands/sign-in/sign-in-command';
-import { UserNotFoundError } from '../../src/application/commands/sign-in/sign-in-errors';
+import { SignInCommand } from '../../src/application/command/sign-in/sign-in-command';
+import { UserNotFoundError } from '../../src/application/command/sign-in/sign-in-errors';
 import { RefreshToken } from '../../src/domain/entity/refresh-token';
 import { User } from '../../src/domain/entity/user';
 import { AccessToken } from '../../src/domain/value-object/access-token';

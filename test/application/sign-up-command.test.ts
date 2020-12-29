@@ -1,5 +1,5 @@
-import { SignUpCommand } from '../../src/application/commands/sign-up/sign-up-command';
-import { UsernameAlreadyTakenError } from '../../src/application/commands/sign-up/sign-up-errors';
+import { SignUpCommand } from '../../src/application/command/sign-up/sign-up-command';
+import { UsernameAlreadyTakenError } from '../../src/application/command/sign-up/sign-up-errors';
 import { User } from '../../src/domain/entity/user';
 import { UserCreatedEvent } from '../../src/event/user-created-event';
 import { createMockDomainEventEmitter } from '../util/create-mock-domain-event-emitter';
