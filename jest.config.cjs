@@ -7,5 +7,6 @@ module.exports = {
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/src/' }),
   preset: 'ts-jest',
   testEnvironment: 'node',
+  setupFiles: ['dotenv/config'],
   setupFilesAfterEnv: ['jest-extended'],
 };

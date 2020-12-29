@@ -8,7 +8,7 @@ export class UserCreatedEvent extends Event<IUserCreatedEvent> {
     super({
       aggregate: user,
       payload: { user },
-      type: UserEventTypes.UserCreated,
+      type: UserEventTypes.Created,
     });
   }
 }
