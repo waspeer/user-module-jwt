@@ -24,7 +24,7 @@ describe('Sign Up Command', () => {
     const password = 'password';
 
     mockUserRepository.findByUsername.mockResolvedValueOnce(undefined);
-    await expect(command.execute({ username, password })).toResolve();
+    await expect(command.execute({ username, password })).resolves.toBeUndefined();
 
     // should be stored
     expect(mockUserRepository.store).toHaveBeenCalledWith(expect.any(User));

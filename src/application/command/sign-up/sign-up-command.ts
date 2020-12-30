@@ -3,8 +3,8 @@ import { UserRepository } from '../../../domain/repository/user-repository';
 import { Password } from '../../../domain/value-object/password';
 import { Username } from '../../../domain/value-object/username';
 import { UserDomainEventEmitter } from '../../../event/event-types';
+import { UserCommand } from '../../types';
 import { UsernameAlreadyTakenError } from './sign-up-errors';
-import { Feature } from '~lib/application/feature';
 
 interface Dependencies {
   domainEventEmitter: UserDomainEventEmitter;
@@ -16,12 +16,11 @@ interface SignUpCommandArguments {
   password: string;
 }
 
-export class SignUpCommand implements Feature<SignUpCommandArguments, void> {
-  private readonly domainEventEmitter: UserDomainEventEmitter;
+export class SignUpCommand extends UserCommand<SignUpCommandArguments> {
   private readonly userRepository: UserRepository;
 
   public constructor({ domainEventEmitter, userRepository }: Dependencies) {
-    this.domainEventEmitter = domainEventEmitter;
+    super({ domainEventEmitter });
     this.userRepository = userRepository;
   }
 
@@ -37,6 +36,6 @@ export class SignUpCommand implements Feature<SignUpCommandArguments, void> {
     const user = new User({ username, password });
 
     await this.userRepository.store(user);
-    this.domainEventEmitter.emit(user.events.all);
+    this.emitEvents(user);
   }
 }

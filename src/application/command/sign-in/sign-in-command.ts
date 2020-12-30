@@ -4,8 +4,8 @@ import { IpAddress } from '../../../domain/value-object/ip-address';
 import { UserAgent } from '../../../domain/value-object/user-agent';
 import { Username } from '../../../domain/value-object/username';
 import type { UserDomainEventEmitter } from '../../../event/event-types';
+import { UserCommand } from '../../types';
 import { UserNotFoundError } from './sign-in-errors';
-import type { Feature } from '~lib/application/feature';
 
 interface Dependencies {
   domainEventEmitter: UserDomainEventEmitter;
@@ -21,12 +21,11 @@ interface SignInCommandArguments {
   username: string;
 }
 
-export class SignInCommand implements Feature<SignInCommandArguments, void> {
-  private readonly domainEventEmitter: UserDomainEventEmitter;
+export class SignInCommand extends UserCommand<SignInCommandArguments> {
   private readonly userRepository: UserRepository;
 
   public constructor({ domainEventEmitter, userRepository }: Dependencies) {
-    this.domainEventEmitter = domainEventEmitter;
+    super({ domainEventEmitter });
     this.userRepository = userRepository;
   }
 
@@ -45,6 +44,6 @@ export class SignInCommand implements Feature<SignInCommandArguments, void> {
     user.signIn({ password: args.password, device });
 
     await this.userRepository.store(user);
-    this.domainEventEmitter.emit(user.events.all);
+    this.emitEvents(user);
   }
 }
