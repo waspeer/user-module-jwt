@@ -5,6 +5,7 @@ export enum UserEventTypes {
   AccessTokenRefreshed = 'user.accessTokenRefreshed',
   Created = 'user.created',
   SignedIn = 'user.signedIn',
+  SignedOut = 'user.signedOut',
 }
 
 export type UserDomainEventEmitter = DomainEventEmitter<UserEventTypes>;
@@ -27,4 +28,9 @@ export type UserSignedInEvent = Event<
     deviceId: string;
     refreshToken: string;
   }
+>;
+
+export type UserSignedOutEvent = Event<
+  UserEventTypes.SignedOut,
+  { invalidatedRefreshToken: string }
 >;

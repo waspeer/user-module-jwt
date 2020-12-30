@@ -7,7 +7,7 @@ This is a module for user management/authentication. This is made for educationa
 -   [x] A user can be created (signed up) by providing a username and password (additional information might be added later)
 -   [x] A user can exchange its credentials (username and password) for an access token and a refresh token (sign in)
 -   [x] A user can exchange its refresh token for a new access token (refresh token)
--   [ ] A user can invalidate its refresh token (sign out)
+-   [x] A user can invalidate its refresh token (sign out)
 -   [ ] The user information of the currently logged in user can be queried (get user by refresh token)
 
 ```mermaid
@@ -85,7 +85,7 @@ end
 subgraph "Sign Out"
   so1["Sign Out"]:::command -->
   so2["Check if provided refresh token is valid"]:::policy -- "valid" -->
-  so3["RefreshTokenInvalidated"]:::event
+  so3["UserSignedOut"]:::event
 end
 
 classDef command fill:steelblue

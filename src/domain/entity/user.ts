@@ -3,6 +3,7 @@ import { UserEventTypes } from '../../event/event-types';
 import { UserAccessTokenRefreshedEvent } from '../../event/user-access-token-refreshed-event';
 import { UserCreatedEvent } from '../../event/user-created-event';
 import { UserSignedInEvent } from '../../event/user-signed-in-event';
+import { UserSignedOutEvent } from '../../event/user-signed-out-event';
 import { AccessToken } from '../value-object/access-token';
 import { IpAddress } from '../value-object/ip-address';
 import { Password } from '../value-object/password';
@@ -38,6 +39,14 @@ export class User extends AggregateRoot<UserProps, UserEventTypes> {
     return this.props.refreshTokens;
   }
 
+  public findRefreshTokenByDevice(device: Device) {
+    return this.props.refreshTokens.find((token) => token.device.id.equals(device.id));
+  }
+
+  public findRefreshTokenById(refreshTokenId: Identifier) {
+    return this.props.refreshTokens.find(({ id }) => id.equals(refreshTokenId));
+  }
+
   public refreshAccessToken({
     ipAddress,
     refreshTokenId,
@@ -45,7 +54,7 @@ export class User extends AggregateRoot<UserProps, UserEventTypes> {
     ipAddress: IpAddress;
     refreshTokenId: Identifier;
   }) {
-    const refreshToken = this.props.refreshTokens.find(({ id }) => id.equals(refreshTokenId));
+    const refreshToken = this.findRefreshTokenById(refreshTokenId);
 
     assert(refreshToken, 'Unable to refresh access token: could not find refresh token');
     assert(
@@ -62,9 +71,7 @@ export class User extends AggregateRoot<UserProps, UserEventTypes> {
     assert(this.password.equals(password), 'Unable to sign in: invalid credentials');
 
     let refreshToken: RefreshToken;
-    const existingRefreshToken = this.props.refreshTokens.find((token) =>
-      token.device.id.equals(device.id),
-    );
+    const existingRefreshToken = this.findRefreshTokenByDevice(device);
 
     if (existingRefreshToken) {
       refreshToken = existingRefreshToken;
@@ -76,6 +83,21 @@ export class User extends AggregateRoot<UserProps, UserEventTypes> {
 
     const accessToken = new AccessToken({ user: this });
     this.events.add(new UserSignedInEvent(this, { accessToken, refreshToken }));
+  }
+
+  public signOut({ refreshTokenId }: { refreshTokenId: Identifier }) {
+    const refreshTokenToInvalidate = this.findRefreshTokenById(refreshTokenId);
+
+    assert(refreshTokenToInvalidate, 'Unable to sign out user: can not find refresh token');
+
+    this.props.refreshTokens = this.props.refreshTokens.filter(
+      (token) => token !== refreshTokenToInvalidate,
+    );
+    this.events.add(
+      new UserSignedOutEvent(this, {
+        invalidatedRefreshToken: refreshTokenToInvalidate,
+      }),
+    );
   }
 
   protected createCreatedEvent() {

@@ -2,6 +2,7 @@ import { RefreshToken } from '../../../src/domain/entity/refresh-token';
 import { IpAddress } from '../../../src/domain/value-object/ip-address';
 import { UserAccessTokenRefreshedEvent } from '../../../src/event/user-access-token-refreshed-event';
 import { UserSignedInEvent } from '../../../src/event/user-signed-in-event';
+import { UserSignedOutEvent } from '../../../src/event/user-signed-out-event';
 import { createDevice } from '../../util/create-device';
 import { createRefreshToken } from '../../util/create-refresh-token';
 import { createUser } from '../../util/create-user';
@@ -77,6 +78,38 @@ describe('User', () => {
       expect(() => user.signIn({ password, device })).not.toThrowError();
       expect(user.refreshTokens).toHaveLength(1);
       expect(user.events.all).toIncludeAllMembers([expect.any(UserSignedInEvent)]);
+    });
+  });
+
+  describe('.signOut', () => {
+    it('should remove the appropriate refresh token from the user', () => {
+      const refreshTokenToInvalidate = createRefreshToken();
+      const otherRefreshToken = createRefreshToken();
+      const user = createUser({ refreshTokens: [refreshTokenToInvalidate, otherRefreshToken] });
+
+      expect(user.refreshTokens).toContain(refreshTokenToInvalidate);
+      expect(user.refreshTokens).toContain(otherRefreshToken);
+
+      expect(() =>
+        user.signOut({
+          refreshTokenId: refreshTokenToInvalidate.id,
+        }),
+      ).not.toThrowError();
+
+      expect(user.refreshTokens).not.toContain(refreshTokenToInvalidate);
+      expect(user.refreshTokens).toContain(otherRefreshToken);
+      expect(user.events.all).toIncludeAllMembers([expect.any(UserSignedOutEvent)]);
+    });
+
+    it('should throw an error when the refreshtoken can not be found', () => {
+      const refreshTokenToInvalidate = createRefreshToken();
+      const user = createUser();
+
+      expect(() =>
+        user.signOut({
+          refreshTokenId: refreshTokenToInvalidate.id,
+        }),
+      ).toThrowError();
     });
   });
 });
