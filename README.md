@@ -8,7 +8,7 @@ This is a module for user management/authentication. This is made for educationa
 -   [x] A user can exchange its credentials (username and password) for an access token and a refresh token (sign in)
 -   [x] A user can exchange its refresh token for a new access token (refresh token)
 -   [x] A user can invalidate its refresh token (sign out)
--   [ ] The user information of the currently logged in user can be queried (get user by refresh token)
+-   [x] The user information of the currently logged in user can be queried (get user by id &lt;-- access token)
 
 ```mermaid
 classDiagram

@@ -1,8 +1,9 @@
-import { User } from 'domain/entity/user';
-import { Username } from 'domain/value-object/username';
-import { Identifier } from '~lib/domain/identifier';
+import type { User } from '../entity/user';
+import type { Username } from '../value-object/username';
+import type { Identifier } from '~lib/domain/identifier';
 
 export interface UserRepository {
+  findById(id: Identifier): Promise<User | undefined>;
   findByRefreshTokenId(refreshTokenId: Identifier): Promise<User | undefined>;
   findByUsername(username: Username): Promise<User | undefined>;
   store(user: User): Promise<void>;
