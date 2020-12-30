@@ -1,9 +1,52 @@
+import { RefreshToken } from '../../../src/domain/entity/refresh-token';
+import { IpAddress } from '../../../src/domain/value-object/ip-address';
+import { UserAccessTokenRefreshedEvent } from '../../../src/event/user-access-token-refreshed-event';
 import { UserSignedInEvent } from '../../../src/event/user-signed-in-event';
 import { createDevice } from '../../util/create-device';
 import { createRefreshToken } from '../../util/create-refresh-token';
 import { createUser } from '../../util/create-user';
+import { Identifier } from '~lib/domain/identifier';
 
 describe('User', () => {
+  describe('.refreshAccessToken', () => {
+    it('should create an AccessToken and extend RefreshToken', () => {
+      const initialRefreshTokenExpireDate = new Date(Date.now() + RefreshToken.LIFETIME / 2);
+      const refreshToken = createRefreshToken({ expiresAt: initialRefreshTokenExpireDate });
+      const user = createUser({ refreshTokens: [refreshToken] });
+
+      expect(() =>
+        user.refreshAccessToken({
+          ipAddress: refreshToken.device.ipAddress,
+          refreshTokenId: refreshToken.id,
+        }),
+      ).not.toThrowError();
+      expect(refreshToken.expiresAt).toBeAfter(initialRefreshTokenExpireDate);
+      expect(user.events.all).toIncludeAllMembers([expect.any(UserAccessTokenRefreshedEvent)]);
+    });
+
+    it('should throw an error when no RefreshToken is found on the user', () => {
+      const user = createUser({ refreshTokens: [] });
+      const ipAddress = new IpAddress('98.139.180.149');
+      const refreshTokenId = new Identifier();
+
+      expect(() => user.refreshAccessToken({ ipAddress, refreshTokenId })).toThrowError();
+    });
+
+    it('should throw an error when the IpAddress does not match the one associated with the RefreshToken', () => {
+      const device = createDevice({ ipAddress: '98.139.180.149' });
+      const refreshToken = createRefreshToken({ device });
+      const user = createUser({ refreshTokens: [refreshToken] });
+      const wrongIpAddress = new IpAddress('69.89.31.226');
+
+      expect(() =>
+        user.refreshAccessToken({
+          ipAddress: wrongIpAddress,
+          refreshTokenId: refreshToken.id,
+        }),
+      ).toThrowError();
+    });
+  });
+
   describe('.signIn', () => {
     it('should throw an error when the provided password does not match', () => {
       const device = createDevice();
@@ -34,23 +77,6 @@ describe('User', () => {
       expect(() => user.signIn({ password, device })).not.toThrowError();
       expect(user.refreshTokens).toHaveLength(1);
       expect(user.events.all).toIncludeAllMembers([expect.any(UserSignedInEvent)]);
-    });
-  });
-
-  describe('.createAccessToken', () => {
-    it('should create a new access token', () => {
-      const refreshToken = createRefreshToken();
-      const user = createUser({ refreshTokens: [refreshToken] });
-      const { device } = refreshToken;
-
-      expect(() => user.createAccessTokenForDevice(device)).not.toThrowError();
-    });
-
-    it('should throw an error when there is no refreshToken associated with the device', () => {
-      const device = createDevice();
-      const user = createUser();
-
-      expect(() => user.createAccessTokenForDevice(device)).toThrowError();
     });
   });
 });

@@ -15,7 +15,11 @@ export abstract class ValueObject<V> {
     return this._value;
   }
 
-  public equals(value: V) {
-    return this._value === value;
+  public equals(value: ValueObject<V>) {
+    if (value.constructor !== this.constructor) {
+      return false;
+    }
+
+    return this._value === value.value;
   }
 }

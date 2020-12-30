@@ -30,7 +30,7 @@ describe('Sign Up Command', () => {
     expect(mockUserRepository.store).toHaveBeenCalledWith(expect.any(User));
 
     const storedUser: User = mockUserRepository.store.mock.calls[0][0];
-    expect(storedUser.username.equals(username)).toBe(true);
+    expect(storedUser.username.value).toBe(username);
     expect(storedUser.password.equals(password)).toBe(true);
 
     // should dispatch created event

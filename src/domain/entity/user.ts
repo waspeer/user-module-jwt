@@ -1,8 +1,10 @@
 import assert from 'assert';
 import { UserEventTypes } from '../../event/event-types';
+import { UserAccessTokenRefreshedEvent } from '../../event/user-access-token-refreshed-event';
 import { UserCreatedEvent } from '../../event/user-created-event';
 import { UserSignedInEvent } from '../../event/user-signed-in-event';
 import { AccessToken } from '../value-object/access-token';
+import { IpAddress } from '../value-object/ip-address';
 import { Password } from '../value-object/password';
 import { Username } from '../value-object/username';
 import { Device } from './device';
@@ -36,23 +38,33 @@ export class User extends AggregateRoot<UserProps, UserEventTypes> {
     return this.props.refreshTokens;
   }
 
-  public createAccessTokenForDevice(device: Device) {
-    const refreshToken = this.findRefreshTokenForDevice(device);
+  public refreshAccessToken({
+    ipAddress,
+    refreshTokenId,
+  }: {
+    ipAddress: IpAddress;
+    refreshTokenId: Identifier;
+  }) {
+    const refreshToken = this.props.refreshTokens.find(({ id }) => id.equals(refreshTokenId));
 
-    assert(refreshToken, 'Unable to create AccessToken: could not find RefreshToken');
+    assert(refreshToken, 'Unable to refresh access token: could not find refresh token');
+    assert(
+      refreshToken.device.ipAddress.equals(ipAddress),
+      'Unable to refresh access token: IP address does not match',
+    );
 
-    return new AccessToken({ user: this });
-  }
-
-  public findRefreshTokenForDevice(device: Device) {
-    return this.props.refreshTokens.find((token) => token.device.id.equals(device.id));
+    const accessToken = new AccessToken({ user: this });
+    refreshToken.extend();
+    this.events.add(new UserAccessTokenRefreshedEvent(this, { accessToken, refreshToken }));
   }
 
   public signIn({ password, device }: { password: string; device: Device }) {
     assert(this.password.equals(password), 'Unable to sign in: invalid credentials');
 
     let refreshToken: RefreshToken;
-    const existingRefreshToken = this.findRefreshTokenForDevice(device);
+    const existingRefreshToken = this.props.refreshTokens.find((token) =>
+      token.device.id.equals(device.id),
+    );
 
     if (existingRefreshToken) {
       refreshToken = existingRefreshToken;
@@ -62,8 +74,7 @@ export class User extends AggregateRoot<UserProps, UserEventTypes> {
       this.props.refreshTokens.push(refreshToken);
     }
 
-    const accessToken = this.createAccessTokenForDevice(device);
-
+    const accessToken = new AccessToken({ user: this });
     this.events.add(new UserSignedInEvent(this, { accessToken, refreshToken }));
   }
 

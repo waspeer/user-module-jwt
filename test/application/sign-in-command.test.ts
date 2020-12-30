@@ -45,7 +45,7 @@ describe('Sign In Command', () => {
     expect(mockUserRepository.store).toHaveBeenCalledWith(expect.any(User));
 
     const storedUser: User = mockUserRepository.store.mock.calls[0][0];
-    const storedRefreshToken = storedUser.findRefreshTokenForDevice(device)!;
+    const storedRefreshToken = user.refreshTokens[0];
 
     expect(storedUser.id.equals(user.id)).toBeTrue();
     expect(storedRefreshToken).toBeInstanceOf(RefreshToken);

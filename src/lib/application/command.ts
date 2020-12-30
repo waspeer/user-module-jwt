@@ -22,8 +22,8 @@ export abstract class Command<E extends string, A extends Record<string, unknown
     this.domainEventEmitter = domainEventEmitter;
   }
 
-  public findEmittedEvent(type: E) {
-    return this.emittedEvents.find((event) => event.type === type);
+  public findEmittedEvent<T extends Event<E>>(type: T extends Event<infer S> ? S : E) {
+    return this.emittedEvents.find((event) => event.type === type) as T | undefined;
   }
 
   public abstract execute(args: A): Promise<void>;
