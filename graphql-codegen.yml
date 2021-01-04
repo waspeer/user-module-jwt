@@ -1,0 +1,15 @@
+overwrite: true
+schema: './src/infrastructure/**/*.ts'
+documents: null
+generates:
+  ./src/infrastructure/graphql/generated-types.ts:
+    config:
+      contextType: ./context#GraphQLContext
+      noSchemaStitching: true
+    plugins:
+      - 'typescript'
+      - 'typescript-resolvers'
+require:
+  - 'ts-node/register/transpile-only'
+  - 'tsconfig-paths/register'
+  - 'dotenv/config'

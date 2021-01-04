@@ -13,11 +13,9 @@ interface Dependencies {
 }
 
 interface SignInCommandArguments {
-  device: {
-    ipAddress: string;
-    userAgent: string;
-  };
+  ipAddress: string;
   password: string;
+  userAgent: string;
   username: string;
 }
 
@@ -31,8 +29,8 @@ export class SignInCommand extends UserCommand<SignInCommandArguments> {
 
   public async execute(args: SignInCommandArguments) {
     const device = new Device({
-      ipAddress: new IpAddress(args.device.ipAddress),
-      userAgent: new UserAgent(args.device.userAgent),
+      ipAddress: new IpAddress(args.ipAddress),
+      userAgent: new UserAgent(args.userAgent),
     });
     const username = new Username(args.username);
     const user = await this.userRepository.findByUsername(username);

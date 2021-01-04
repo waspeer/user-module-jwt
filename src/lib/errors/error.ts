@@ -4,7 +4,7 @@
  * @template A - The arguments of the function
  */
 interface MessageCreator<A extends any[]> {
-  (...args: A): string
+  (...args: A): string;
 }
 
 /**
@@ -13,7 +13,10 @@ interface MessageCreator<A extends any[]> {
  * @param {string} name - Name of the error
  * @param {MessageCreator} messageCreator - Function that creates the message of the error
  */
-export function createCustomError<A extends any[]>(name: string, messageCreator: MessageCreator<A>) {
+export function createCustomError<A extends any[]>(
+  name: string,
+  messageCreator: MessageCreator<A>,
+) {
   class CustomError extends Error {
     public constructor(...args: A) {
       super(messageCreator(...args));

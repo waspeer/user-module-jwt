@@ -1,7 +1,7 @@
 import { createCustomError } from '~lib/errors/error';
 
 enum RefreshAccessTokenErrorTypes {
-  UserNotFound = 'UserNotFound',
+  UserNotFound = 'UserNotFoundError',
 }
 
 export const UserNotFoundError = createCustomError(

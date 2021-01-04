@@ -32,6 +32,7 @@ export class RefreshAccessTokenCommand extends UserCommand<RefreshAccessTokenCom
     const user = await this.userRepository.findByRefreshTokenId(refreshTokenId);
 
     if (!user) {
+      // TODO this should be a better error, like: token expired or blabla
       throw new UserNotFoundError();
     }
 

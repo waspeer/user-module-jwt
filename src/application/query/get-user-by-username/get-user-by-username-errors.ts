@@ -1,10 +1,10 @@
 import { createCustomError } from '~lib/errors/error';
 
-enum SignOutErrorTypes {
+enum GetUserByUsernameQueryErrorTypes {
   UserNotFound = 'UserNotFoundError',
 }
 
 export const UserNotFoundError = createCustomError(
-  SignOutErrorTypes.UserNotFound,
-  () => 'Unable to sign out user: can not associate refresh token with user',
+  GetUserByUsernameQueryErrorTypes.UserNotFound,
+  () => 'Unable to get user by username: user not found',
 );

@@ -19,6 +19,7 @@ export class Password extends ValueObject<string> {
     super(bcrypt.hashSync(value, SALT_ROUNDS));
   }
 
+  // @ts-expect-error: This is the only way encrypted passwords can be compared
   public equals(password: string) {
     return bcrypt.compareSync(password, this._value);
   }
