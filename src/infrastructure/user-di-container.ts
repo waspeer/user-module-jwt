@@ -11,9 +11,13 @@ import { InMemoryUserRepository } from './repository/inmemory-user-repository';
 import type { Server } from './types';
 import { WinstonLogger } from './winston-logger';
 import { GetUserByUsernameQuery } from 'application/query/get-user-by-username/get-user-by-username-query';
+import type { Command, Query } from '~lib/application/types';
 import { NodeDomainEventEmitter } from '~lib/events/node-domain-event-emitter';
 import { GraphQLSchema } from '~lib/graphql/grapqhl-schema';
 import { Logger } from '~lib/logger';
+
+type AnyCommand = Command<any>;
+type AnyQuery = Query<any, any>;
 
 export class UserDIContainer {
   private readonly container: AwilixContainer;
@@ -32,17 +36,17 @@ export class UserDIContainer {
       schema: asClass<GraphQLSchema>(Schema).singleton(),
       server: asClass<Server>(ExpressServer).singleton(),
 
-      // -- repository
+      // - repository
       userRepository: asClass<UserRepository>(InMemoryUserRepository),
 
       ///
       // APPLICATION
       ///
-      getUserByUsernameQuery: asClass(GetUserByUsernameQuery),
-      refreshAccessTokenCommand: asClass(RefreshAccessTokenCommand),
-      signInCommand: asClass(SignInCommand),
-      signOutCommand: asClass(SignOutCommand),
-      signUpCommand: asClass(SignUpCommand),
+      getUserByUsernameQuery: asClass<AnyQuery>(GetUserByUsernameQuery),
+      refreshAccessTokenCommand: asClass<AnyCommand>(RefreshAccessTokenCommand),
+      signInCommand: asClass<AnyCommand>(SignInCommand),
+      signOutCommand: asClass<AnyCommand>(SignOutCommand),
+      signUpCommand: asClass<AnyCommand>(SignUpCommand),
     });
   }
 

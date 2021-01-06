@@ -23,16 +23,13 @@ export class MeResolver extends GraphQLResolver<Result, Parent, Args, GraphQLCon
     this.getUserByUsernameQuery = getUserByUsernameQuery;
   }
 
+  public handleError() {
+    return null;
+  }
+
   public async resolve(_parent: Parent, _args: Args, context: GraphQLContext) {
     const user = context.user as UserDTO;
-    let userDTO;
-
-    try {
-      userDTO = await this.getUserByUsernameQuery.execute({ username: user.username });
-    } catch (error) {
-      console.log({ error });
-      throw error;
-    }
+    const userDTO = await this.getUserByUsernameQuery.execute({ username: user.username });
 
     return {
       __typename: 'User' as const,

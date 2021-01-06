@@ -4,7 +4,8 @@ export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-export type RequireFields<T, K extends keyof T> = { [X in Exclude<keyof T, K>]?: T[X] } & { [P in K]-?: NonNullable<T[P]> };
+export type RequireFields<T, K extends keyof T> = { [X in Exclude<keyof T, K>]?: T[X] } &
+  { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -75,11 +76,9 @@ export type Mutation = {
   signUp: SignUpPayload;
 };
 
-
 export type MutationSignInArgs = {
   input: SignInInput;
 };
-
 
 export type MutationSignUpArgs = {
   input: SignUpInput;
@@ -94,34 +93,43 @@ export type Error = {
   message: Scalars['String'];
 };
 
-
-
 export type ResolverTypeWrapper<T> = Promise<T> | T;
 
-export type Resolver<TResult, TParent = {}, TContext = {}, TArgs = {}> = ResolverFn<TResult, TParent, TContext, TArgs>;
+export type Resolver<TResult, TParent = {}, TContext = {}, TArgs = {}> = ResolverFn<
+  TResult,
+  TParent,
+  TContext,
+  TArgs
+>;
 
 export type ResolverFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
   args: TArgs,
   context: TContext,
-  info: GraphQLResolveInfo
+  info: GraphQLResolveInfo,
 ) => Promise<TResult> | TResult;
 
 export type SubscriptionSubscribeFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
   args: TArgs,
   context: TContext,
-  info: GraphQLResolveInfo
+  info: GraphQLResolveInfo,
 ) => AsyncIterator<TResult> | Promise<AsyncIterator<TResult>>;
 
 export type SubscriptionResolveFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
   args: TArgs,
   context: TContext,
-  info: GraphQLResolveInfo
+  info: GraphQLResolveInfo,
 ) => TResult | Promise<TResult>;
 
-export interface SubscriptionSubscriberObject<TResult, TKey extends string, TParent, TContext, TArgs> {
+export interface SubscriptionSubscriberObject<
+  TResult,
+  TKey extends string,
+  TParent,
+  TContext,
+  TArgs
+> {
   subscribe: SubscriptionSubscribeFn<{ [key in TKey]: TResult }, TParent, TContext, TArgs>;
   resolve?: SubscriptionResolveFn<TResult, { [key in TKey]: TResult }, TContext, TArgs>;
 }
@@ -135,17 +143,27 @@ export type SubscriptionObject<TResult, TKey extends string, TParent, TContext, 
   | SubscriptionSubscriberObject<TResult, TKey, TParent, TContext, TArgs>
   | SubscriptionResolverObject<TResult, TParent, TContext, TArgs>;
 
-export type SubscriptionResolver<TResult, TKey extends string, TParent = {}, TContext = {}, TArgs = {}> =
+export type SubscriptionResolver<
+  TResult,
+  TKey extends string,
+  TParent = {},
+  TContext = {},
+  TArgs = {}
+> =
   | ((...args: any[]) => SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>)
   | SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>;
 
 export type TypeResolveFn<TTypes, TParent = {}, TContext = {}> = (
   parent: TParent,
   context: TContext,
-  info: GraphQLResolveInfo
+  info: GraphQLResolveInfo,
 ) => Maybe<TTypes> | Promise<Maybe<TTypes>>;
 
-export type IsTypeOfResolverFn<T = {}, TContext = {}> = (obj: T, context: TContext, info: GraphQLResolveInfo) => boolean | Promise<boolean>;
+export type IsTypeOfResolverFn<T = {}, TContext = {}> = (
+  obj: T,
+  context: TContext,
+  info: GraphQLResolveInfo,
+) => boolean | Promise<boolean>;
 
 export type NextResolverFn<T> = () => Promise<T>;
 
@@ -154,7 +172,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
   parent: TParent,
   args: TArgs,
   context: TContext,
-  info: GraphQLResolveInfo
+  info: GraphQLResolveInfo,
 ) => TResult | Promise<TResult>;
 
 /** Mapping between all available schema types and the resolvers types */
@@ -164,7 +182,9 @@ export type ResolversTypes = {
   UsernameAlreadyTakenError: ResolverTypeWrapper<UsernameAlreadyTakenError>;
   UserNotFoundError: ResolverTypeWrapper<UserNotFoundError>;
   RefreshAccessTokenSuccessPayload: ResolverTypeWrapper<RefreshAccessTokenSuccessPayload>;
-  RefreshAccessTokenPayload: ResolversTypes['RefreshAccessTokenSuccessPayload'] | ResolversTypes['UserNotFoundError'];
+  RefreshAccessTokenPayload:
+    | ResolversTypes['RefreshAccessTokenSuccessPayload']
+    | ResolversTypes['UserNotFoundError'];
   SignInInput: SignInInput;
   SignInSuccessPayload: ResolverTypeWrapper<SignInSuccessPayload>;
   SignInPayload: ResolversTypes['SignInSuccessPayload'] | ResolversTypes['UserNotFoundError'];
@@ -172,7 +192,9 @@ export type ResolversTypes = {
   SignOutPayload: ResolversTypes['SignOutSuccessPayload'] | ResolversTypes['UserNotFoundError'];
   SignUpInput: SignUpInput;
   SignUpSuccessPayload: ResolverTypeWrapper<SignUpSuccessPayload>;
-  SignUpPayload: ResolversTypes['SignUpSuccessPayload'] | ResolversTypes['UsernameAlreadyTakenError'];
+  SignUpPayload:
+    | ResolversTypes['SignUpSuccessPayload']
+    | ResolversTypes['UsernameAlreadyTakenError'];
   Mutation: ResolverTypeWrapper<{}>;
   Query: ResolverTypeWrapper<{}>;
   Error: ResolversTypes['UsernameAlreadyTakenError'] | ResolversTypes['UserNotFoundError'];
@@ -186,85 +208,171 @@ export type ResolversParentTypes = {
   UsernameAlreadyTakenError: UsernameAlreadyTakenError;
   UserNotFoundError: UserNotFoundError;
   RefreshAccessTokenSuccessPayload: RefreshAccessTokenSuccessPayload;
-  RefreshAccessTokenPayload: ResolversParentTypes['RefreshAccessTokenSuccessPayload'] | ResolversParentTypes['UserNotFoundError'];
+  RefreshAccessTokenPayload:
+    | ResolversParentTypes['RefreshAccessTokenSuccessPayload']
+    | ResolversParentTypes['UserNotFoundError'];
   SignInInput: SignInInput;
   SignInSuccessPayload: SignInSuccessPayload;
-  SignInPayload: ResolversParentTypes['SignInSuccessPayload'] | ResolversParentTypes['UserNotFoundError'];
+  SignInPayload:
+    | ResolversParentTypes['SignInSuccessPayload']
+    | ResolversParentTypes['UserNotFoundError'];
   SignOutSuccessPayload: SignOutSuccessPayload;
-  SignOutPayload: ResolversParentTypes['SignOutSuccessPayload'] | ResolversParentTypes['UserNotFoundError'];
+  SignOutPayload:
+    | ResolversParentTypes['SignOutSuccessPayload']
+    | ResolversParentTypes['UserNotFoundError'];
   SignUpInput: SignUpInput;
   SignUpSuccessPayload: SignUpSuccessPayload;
-  SignUpPayload: ResolversParentTypes['SignUpSuccessPayload'] | ResolversParentTypes['UsernameAlreadyTakenError'];
+  SignUpPayload:
+    | ResolversParentTypes['SignUpSuccessPayload']
+    | ResolversParentTypes['UsernameAlreadyTakenError'];
   Mutation: {};
   Query: {};
-  Error: ResolversParentTypes['UsernameAlreadyTakenError'] | ResolversParentTypes['UserNotFoundError'];
+  Error:
+    | ResolversParentTypes['UsernameAlreadyTakenError']
+    | ResolversParentTypes['UserNotFoundError'];
   Boolean: Scalars['Boolean'];
 };
 
-export type UserResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
+export type UserResolvers<
+  ContextType = GraphQLContext,
+  ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']
+> = {
   username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type UsernameAlreadyTakenErrorResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['UsernameAlreadyTakenError'] = ResolversParentTypes['UsernameAlreadyTakenError']> = {
+export type UsernameAlreadyTakenErrorResolvers<
+  ContextType = GraphQLContext,
+  ParentType extends ResolversParentTypes['UsernameAlreadyTakenError'] = ResolversParentTypes['UsernameAlreadyTakenError']
+> = {
   message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type UserNotFoundErrorResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['UserNotFoundError'] = ResolversParentTypes['UserNotFoundError']> = {
+export type UserNotFoundErrorResolvers<
+  ContextType = GraphQLContext,
+  ParentType extends ResolversParentTypes['UserNotFoundError'] = ResolversParentTypes['UserNotFoundError']
+> = {
   message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type RefreshAccessTokenSuccessPayloadResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RefreshAccessTokenSuccessPayload'] = ResolversParentTypes['RefreshAccessTokenSuccessPayload']> = {
+export type RefreshAccessTokenSuccessPayloadResolvers<
+  ContextType = GraphQLContext,
+  ParentType extends ResolversParentTypes['RefreshAccessTokenSuccessPayload'] = ResolversParentTypes['RefreshAccessTokenSuccessPayload']
+> = {
   accessToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type RefreshAccessTokenPayloadResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RefreshAccessTokenPayload'] = ResolversParentTypes['RefreshAccessTokenPayload']> = {
-  __resolveType: TypeResolveFn<'RefreshAccessTokenSuccessPayload' | 'UserNotFoundError', ParentType, ContextType>;
+export type RefreshAccessTokenPayloadResolvers<
+  ContextType = GraphQLContext,
+  ParentType extends ResolversParentTypes['RefreshAccessTokenPayload'] = ResolversParentTypes['RefreshAccessTokenPayload']
+> = {
+  __resolveType: TypeResolveFn<
+    'RefreshAccessTokenSuccessPayload' | 'UserNotFoundError',
+    ParentType,
+    ContextType
+  >;
 };
 
-export type SignInSuccessPayloadResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['SignInSuccessPayload'] = ResolversParentTypes['SignInSuccessPayload']> = {
+export type SignInSuccessPayloadResolvers<
+  ContextType = GraphQLContext,
+  ParentType extends ResolversParentTypes['SignInSuccessPayload'] = ResolversParentTypes['SignInSuccessPayload']
+> = {
   accessToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type SignInPayloadResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['SignInPayload'] = ResolversParentTypes['SignInPayload']> = {
-  __resolveType: TypeResolveFn<'SignInSuccessPayload' | 'UserNotFoundError', ParentType, ContextType>;
+export type SignInPayloadResolvers<
+  ContextType = GraphQLContext,
+  ParentType extends ResolversParentTypes['SignInPayload'] = ResolversParentTypes['SignInPayload']
+> = {
+  __resolveType: TypeResolveFn<
+    'SignInSuccessPayload' | 'UserNotFoundError',
+    ParentType,
+    ContextType
+  >;
 };
 
-export type SignOutSuccessPayloadResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['SignOutSuccessPayload'] = ResolversParentTypes['SignOutSuccessPayload']> = {
+export type SignOutSuccessPayloadResolvers<
+  ContextType = GraphQLContext,
+  ParentType extends ResolversParentTypes['SignOutSuccessPayload'] = ResolversParentTypes['SignOutSuccessPayload']
+> = {
   _empty?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type SignOutPayloadResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['SignOutPayload'] = ResolversParentTypes['SignOutPayload']> = {
-  __resolveType: TypeResolveFn<'SignOutSuccessPayload' | 'UserNotFoundError', ParentType, ContextType>;
+export type SignOutPayloadResolvers<
+  ContextType = GraphQLContext,
+  ParentType extends ResolversParentTypes['SignOutPayload'] = ResolversParentTypes['SignOutPayload']
+> = {
+  __resolveType: TypeResolveFn<
+    'SignOutSuccessPayload' | 'UserNotFoundError',
+    ParentType,
+    ContextType
+  >;
 };
 
-export type SignUpSuccessPayloadResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['SignUpSuccessPayload'] = ResolversParentTypes['SignUpSuccessPayload']> = {
+export type SignUpSuccessPayloadResolvers<
+  ContextType = GraphQLContext,
+  ParentType extends ResolversParentTypes['SignUpSuccessPayload'] = ResolversParentTypes['SignUpSuccessPayload']
+> = {
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type SignUpPayloadResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['SignUpPayload'] = ResolversParentTypes['SignUpPayload']> = {
-  __resolveType: TypeResolveFn<'SignUpSuccessPayload' | 'UsernameAlreadyTakenError', ParentType, ContextType>;
+export type SignUpPayloadResolvers<
+  ContextType = GraphQLContext,
+  ParentType extends ResolversParentTypes['SignUpPayload'] = ResolversParentTypes['SignUpPayload']
+> = {
+  __resolveType: TypeResolveFn<
+    'SignUpSuccessPayload' | 'UsernameAlreadyTakenError',
+    ParentType,
+    ContextType
+  >;
 };
 
-export type MutationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  refreshAccessToken?: Resolver<ResolversTypes['RefreshAccessTokenPayload'], ParentType, ContextType>;
-  signIn?: Resolver<ResolversTypes['SignInPayload'], ParentType, ContextType, RequireFields<MutationSignInArgs, 'input'>>;
+export type MutationResolvers<
+  ContextType = GraphQLContext,
+  ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']
+> = {
+  refreshAccessToken?: Resolver<
+    ResolversTypes['RefreshAccessTokenPayload'],
+    ParentType,
+    ContextType
+  >;
+  signIn?: Resolver<
+    ResolversTypes['SignInPayload'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationSignInArgs, 'input'>
+  >;
   signOut?: Resolver<ResolversTypes['SignOutPayload'], ParentType, ContextType>;
-  signUp?: Resolver<ResolversTypes['SignUpPayload'], ParentType, ContextType, RequireFields<MutationSignUpArgs, 'input'>>;
+  signUp?: Resolver<
+    ResolversTypes['SignUpPayload'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationSignUpArgs, 'input'>
+  >;
 };
 
-export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+export type QueryResolvers<
+  ContextType = GraphQLContext,
+  ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']
+> = {
   me?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
 };
 
-export type ErrorResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Error'] = ResolversParentTypes['Error']> = {
-  __resolveType: TypeResolveFn<'UsernameAlreadyTakenError' | 'UserNotFoundError', ParentType, ContextType>;
+export type ErrorResolvers<
+  ContextType = GraphQLContext,
+  ParentType extends ResolversParentTypes['Error'] = ResolversParentTypes['Error']
+> = {
+  __resolveType: TypeResolveFn<
+    'UsernameAlreadyTakenError' | 'UserNotFoundError',
+    ParentType,
+    ContextType
+  >;
   message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
@@ -284,7 +392,6 @@ export type Resolvers<ContextType = GraphQLContext> = {
   Query?: QueryResolvers<ContextType>;
   Error?: ErrorResolvers<ContextType>;
 };
-
 
 /**
  * @deprecated
