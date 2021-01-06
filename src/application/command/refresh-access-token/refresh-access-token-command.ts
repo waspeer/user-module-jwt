@@ -2,7 +2,7 @@ import { UserRepository } from '../../../domain/repository/user-repository';
 import { IpAddress } from '../../../domain/value-object/ip-address';
 import { UserDomainEventEmitter } from '../../../event/event-types';
 import { UserCommand } from '../../types';
-import { UserNotFoundError } from './refresh-access-token-errors';
+import { InvalidRefreshTokenError } from './refresh-access-token-errors';
 import { Identifier } from '~lib/domain/identifier';
 
 interface RefreshAccessTokenCommandDependencies {
@@ -32,8 +32,7 @@ export class RefreshAccessTokenCommand extends UserCommand<RefreshAccessTokenCom
     const user = await this.userRepository.findByRefreshTokenId(refreshTokenId);
 
     if (!user) {
-      // TODO this should be a better error, like: token expired or blabla
-      throw new UserNotFoundError();
+      throw new InvalidRefreshTokenError();
     }
 
     user.refreshAccessToken({ ipAddress, refreshTokenId });

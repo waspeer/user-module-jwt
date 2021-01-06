@@ -1,10 +1,10 @@
 import { createCustomError } from '~lib/errors/error';
 
 enum RefreshAccessTokenErrorTypes {
-  UserNotFound = 'UserNotFoundError',
+  InvalidRefreshToken = 'InvalidRefreshTokenError',
 }
 
-export const UserNotFoundError = createCustomError(
-  RefreshAccessTokenErrorTypes.UserNotFound,
+export const InvalidRefreshTokenError = createCustomError(
+  RefreshAccessTokenErrorTypes.InvalidRefreshToken,
   () => 'Unable to refresh access token: cannot associate refresh token with user',
 );

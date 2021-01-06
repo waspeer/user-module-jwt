@@ -1,22 +1,21 @@
 import { RefreshAccessTokenCommand } from '../../../../../application/command/refresh-access-token/refresh-access-token-command';
-import { RefreshToken } from '../../../../../domain/entity/refresh-token';
 import { UserAccessTokenRefreshedEvent, UserEventTypes } from '../../../../../event/event-types';
 import { GraphQLContext } from '../../../context';
-import { MutationResolvers } from '../../../generated-types';
-import { GraphQLResolver, ResolverArgs, ResolverParent } from '~lib/graphql/graphql-resolver';
-import { getEnvironmentVariable } from '~lib/helpers/get-environment-variable';
+import { MutationResolvers } from '../../../graphql-types.gen';
+import { CookieUtil } from '../../../util/cookie';
+import { GraphQLResolver } from '~lib/graphql/graphql-resolver';
+import { ResolverArgs, ResolverParent, ResolverResult } from '~lib/graphql/types';
 
 interface RefreshAccessTokenResolverDependencies {
   refreshAccessTokenCommand: RefreshAccessTokenCommand;
 }
 
 type ResolverFn = NonNullable<MutationResolvers['refreshAccessToken']>;
+type Result = ResolverResult<ResolverFn>;
 type Parent = ResolverParent<ResolverFn>;
 type Args = ResolverArgs<ResolverFn>;
 
-const NODE_ENV = getEnvironmentVariable('NODE_ENV', 'development');
-
-export class RefreshAccessToken extends GraphQLResolver<ResolverFn> {
+export class RefreshAccessToken extends GraphQLResolver<Result, Parent, Args, GraphQLContext> {
   public path = ['Mutation', 'refreshAccessToken'] as const;
   private readonly refreshAccessTokenCommand: RefreshAccessTokenCommand;
 
@@ -30,10 +29,10 @@ export class RefreshAccessToken extends GraphQLResolver<ResolverFn> {
       await this.refreshAccessTokenCommand.execute({
         ipAddress: (request.headers['x-forwarded-for'] ||
           request.connection.remoteAddress) as string,
-        refreshToken: request.cookies.rt, // TODO get cookie name from env variables
+        refreshToken: CookieUtil.getRefreshTokenCookie(request),
       });
     } catch (error) {
-      response.clearCookie('rt'); // TODO env var bla
+      CookieUtil.clearRefreshTokenCookie(response);
 
       throw error;
     }
@@ -46,15 +45,7 @@ export class RefreshAccessToken extends GraphQLResolver<ResolverFn> {
       throw new Error('Unexpected error while signing in');
     }
 
-    // TODO set name as env variable
-    // TODO refactor this into some kind of utility function
-    response.cookie('rt', refreshedEvent.payload.refreshToken, {
-      httpOnly: true,
-      maxAge: RefreshToken.LIFETIME,
-      secure: NODE_ENV === 'production',
-      // TODO sign cookie?
-      sameSite: 'lax',
-    });
+    CookieUtil.setRefreshTokenCookie(response, refreshedEvent.payload.refreshToken);
 
     return {
       __typename: 'RefreshAccessTokenSuccessPayload' as const,

@@ -1,22 +1,21 @@
 import { SignInCommand } from '../../../../../application/command/sign-in/sign-in-command';
 import { UserEventTypes, UserSignedInEvent } from '../../../../../event/event-types';
-import { MutationResolvers } from '../../../generated-types';
-import { RefreshToken } from 'domain/entity/refresh-token';
-import { GraphQLContext } from 'infrastructure/graphql/context';
-import { GraphQLResolver, ResolverArgs, ResolverParent } from '~lib/graphql/graphql-resolver';
-import { getEnvironmentVariable } from '~lib/helpers/get-environment-variable';
+import { GraphQLContext } from '../../../context';
+import { MutationResolvers } from '../../../graphql-types.gen';
+import { CookieUtil } from '../../../util/cookie';
+import { GraphQLResolver } from '~lib/graphql/graphql-resolver';
+import { ResolverArgs, ResolverParent, ResolverResult } from '~lib/graphql/types';
 
 interface SignInResolverDependencies {
   signInCommand: SignInCommand;
 }
 
 type ResolverFn = NonNullable<MutationResolvers['signIn']>;
+type Result = ResolverResult<ResolverFn>;
 type Parent = ResolverParent<ResolverFn>;
 type Args = ResolverArgs<ResolverFn>;
 
-const NODE_ENV = getEnvironmentVariable('NODE_ENV', 'development');
-
-export class SignInResolver extends GraphQLResolver<ResolverFn> {
+export class SignInResolver extends GraphQLResolver<Result, Parent, Args, GraphQLContext> {
   public path = ['Mutation', 'signIn'] as const;
   public signInCommand: SignInCommand;
 
@@ -41,14 +40,7 @@ export class SignInResolver extends GraphQLResolver<ResolverFn> {
       throw new Error('Unexpected error while signing in');
     }
 
-    // TODO set name as env variable
-    response.cookie('rt', signInEvent.payload.refreshToken, {
-      httpOnly: true,
-      maxAge: RefreshToken.LIFETIME,
-      secure: NODE_ENV === 'production',
-      // TODO sign cookie?
-      sameSite: 'lax',
-    });
+    CookieUtil.setRefreshTokenCookie(response, signInEvent.payload.refreshToken);
 
     return {
       __typename: 'SignInSuccessPayload' as const,

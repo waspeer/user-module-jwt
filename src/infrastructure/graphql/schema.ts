@@ -1,10 +1,9 @@
-import { gql } from 'apollo-server-express';
 import * as directives from './directives';
 import * as modules from './modules';
 import { GraphQLSchema } from '~lib/graphql/grapqhl-schema';
 
 export class Schema extends GraphQLSchema {
-  public readonly baseTypeDefs = gql`
+  public readonly baseTypeDefs = /* GraphQL */ `
     # SHARED
     interface Error {
       message: String!
@@ -15,7 +14,6 @@ export class Schema extends GraphQLSchema {
     type Query
   `;
 
-  public readonly directives = [directives];
-
-  public readonly modules = [modules];
+  public readonly directives = Object.values(directives);
+  public readonly modules = Object.values(modules);
 }

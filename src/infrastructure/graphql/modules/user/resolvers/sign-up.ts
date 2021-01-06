@@ -1,18 +1,21 @@
 import { SignUpCommand } from '../../../../../application/command/sign-up/sign-up-command';
 import { UserMapper } from '../../../../../application/mapper/user-mapper';
 import { UserCreatedEvent, UserEventTypes } from '../../../../../event/event-types';
-import { MutationResolvers } from '../../../generated-types';
-import { GraphQLResolver, ResolverArgs, ResolverParent } from '~lib/graphql/graphql-resolver';
+import { MutationResolvers } from '../../../graphql-types.gen';
+import { GraphQLContext } from 'infrastructure/graphql/context';
+import { GraphQLResolver } from '~lib/graphql/graphql-resolver';
+import { ResolverResult, ResolverParent, ResolverArgs } from '~lib/graphql/types';
 
 interface SignUpResolverDependencies {
   signUpCommand: SignUpCommand;
 }
 
 type ResolverFn = NonNullable<MutationResolvers['signUp']>;
+type Result = ResolverResult<ResolverFn>;
 type Parent = ResolverParent<ResolverFn>;
 type Args = ResolverArgs<ResolverFn>;
 
-export class SignUpResolver extends GraphQLResolver<ResolverFn> {
+export class SignUpResolver extends GraphQLResolver<Result, Parent, Args, GraphQLContext> {
   public path = ['Mutation', 'signUp'] as const;
   private readonly signUpCommand: SignUpCommand;
 

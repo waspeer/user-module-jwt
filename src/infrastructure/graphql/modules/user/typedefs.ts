@@ -1,12 +1,14 @@
-import { gql } from 'apollo-server-express';
-
-export const userTypeDefs = gql`
+export const userTypeDefs = /* GraphQL */ `
   # SHARED
   type User {
     username: String!
   }
 
   # ERRORS
+  type InvalidRefreshTokenError implements Error {
+    message: String!
+  }
+
   type UsernameAlreadyTakenError implements Error {
     message: String!
   }
@@ -20,7 +22,7 @@ export const userTypeDefs = gql`
     accessToken: String!
   }
 
-  union RefreshAccessTokenPayload = RefreshAccessTokenSuccessPayload | UserNotFoundError
+  union RefreshAccessTokenPayload = RefreshAccessTokenSuccessPayload | InvalidRefreshTokenError
 
   # SIGN IN
   input SignInInput {
@@ -55,7 +57,7 @@ export const userTypeDefs = gql`
 
   # ROOT TYPES
   extend type Mutation {
-    refreshAccessToken: RefreshAccessTokenPayload!
+    refreshAccessToken: RefreshAccessTokenPayload! @auth
     signIn(input: SignInInput!): SignInPayload!
     signOut: SignOutPayload!
     signUp(input: SignUpInput!): SignUpPayload!

@@ -1,8 +1,8 @@
 overwrite: true
-schema: './src/infrastructure/**/*.ts'
+schema: './src/infrastructure/graphql/**/*.ts'
 documents: null
 generates:
-  ./src/infrastructure/graphql/generated-types.ts:
+  ./src/infrastructure/graphql/graphql-types.gen.ts:
     config:
       contextType: ./context#GraphQLContext
       noSchemaStitching: true

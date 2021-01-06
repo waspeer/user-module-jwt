@@ -1,200 +1,89 @@
-/* eslint-disable max-classes-per-file */
+import { ExecutableSchemaTransformation, makeExecutableSchema } from '@graphql-tools/schema';
+import { getDirectives, IResolvers, MapperKind, mapSchema } from '@graphql-tools/utils';
+import { DirectiveLocation, GraphQLSchema as Schema } from 'graphql';
 import {
-  gql,
-  IResolvers,
-  makeExecutableSchema,
-  SchemaDirectiveVisitor,
-} from 'apollo-server-express';
-import {
-  DirectiveLocation,
-  DirectiveLocation,
-  DirectiveLocation,
-  DirectiveLocationEnum,
-  DocumentNode,
-} from 'graphql';
-import { DirectiveMap, GraphQLDirective } from './graphql-directive';
-import type { GraphQLModule } from './graphql-module';
+  GraphQLDirectiveClass,
+  GraphQLModule,
+  GraphQLSchema as IGraphQLSchema,
+  TransformerMap,
+} from './types';
+import { AnyObject } from '~lib/helpers/helper-types';
 
-type Cradle = Record<string, unknown>;
+const directiveLocationToMapperKindMap: Record<keyof TransformerMap, MapperKind> = {
+  [DirectiveLocation.FIELD_DEFINITION]: MapperKind.FIELD,
+};
 
-interface GraphQLDirectiveClass {
-  new (): GraphQLDirective;
-}
+export abstract class GraphQLSchema implements IGraphQLSchema {
+  public directives: GraphQLDirectiveClass[] = [];
+  public abstract modules: GraphQLModule[];
 
-interface GraphQLModuleClass {
-  new (): GraphQLModule;
-}
-
-export abstract class GraphQLSchema {
-  public directives: Record<string, GraphQLDirectiveClass>[] = [];
-  public abstract modules: Record<string, GraphQLModuleClass>[];
-
-  public baseTypeDefs = gql`
+  /**
+   * The base typeDefs. Should at least include a Query and Mutation root type.
+   */
+  public baseTypeDefs = /* GraphQL */ `
     type Query
     type Mutation
   `;
 
-  public constructor(private readonly cradle: Cradle) {}
+  public constructor(private readonly cradle: AnyObject) {}
 
+  /**
+   * Returns a executable GraphQL schema that can be used to start a GraphQL server
+   */
   public makeExecutableSchema() {
-    const typeDefs: DocumentNode[] = [this.baseTypeDefs];
+    const typeDefs: string[] = [this.baseTypeDefs];
     const resolvers: IResolvers[] = [];
-    const directives = this.directives.flatMap((directiveRecord) => Object.values(directiveRecord));
-    const directiveConfigEntries: [string, typeof SchemaDirectiveVisitor][] = [];
-    const modules = this.modules.flatMap((moduleRecord) => Object.values(moduleRecord));
+    const schemaTransforms: ExecutableSchemaTransformation[] = [];
 
-    directives.forEach((Directive) => {
-      const directive = new Directive();
+    this.directives.forEach((Directive) => {
+      const directive = new Directive(this.cradle);
+      const transformerEntries = Object.entries(directive.transformers);
 
-      directiveConfigEntries.push(...this.mapDirectiveToApolloConfigEntries(directive));
       typeDefs.push(directive.typeDef);
+      schemaTransforms.push(
+        ...directive.names.map((name) => (schema: Schema) =>
+          mapSchema(
+            schema,
+            Object.fromEntries(
+              transformerEntries.map(([directiveLocation, schemaTransformer]) => [
+                directiveLocationToMapperKindMap[directiveLocation as keyof TransformerMap],
+                (node: any) => {
+                  const directives = getDirectives(schema, node);
+                  const args = directives[name];
+
+                  if (args && schemaTransformer) {
+                    return schemaTransformer(node, args);
+                  }
+
+                  return node;
+                },
+              ]),
+            ),
+          ),
+        ),
+      );
     });
 
-    modules.forEach((Module) => {
-      const module = new Module();
-      const moduleResolvers = module.resolvers.flatMap((resolverRecord) =>
-        Object.values(resolverRecord),
-      );
-
-      typeDefs.push(...module.typeDefs);
+    this.modules.forEach((mod) => {
+      typeDefs.push(...mod.typeDefs);
       resolvers.push(
-        ...moduleResolvers.map((Resolver) => {
+        ...mod.resolvers.map((Resolver) => {
           const resolver = new Resolver(this.cradle);
-          return resolver.makeResolverObject();
+          const [rootType, fieldName] = resolver.path;
+          const resolverFunction = resolver.resolve.bind(resolver);
+
+          return { [rootType]: { [fieldName]: resolverFunction } };
         }),
       );
     });
 
     return makeExecutableSchema({
+      schemaTransforms,
       resolvers,
       resolverValidationOptions: {
-        requireResolversForResolveType: false,
+        requireResolversForResolveType: 'ignore',
       },
-      schemaDirectives: Object.fromEntries(directiveConfigEntries),
       typeDefs,
     });
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  private mapDirectiveToApolloConfigEntries(directive: GraphQLDirective) {
-    const ApolloClass = class extends SchemaDirectiveVisitor {
-      public visitSchema(...args: Parameters<SchemaDirectiveVisitor['visitSchema']>) {
-        const method = directive.directiveMap[DirectiveLocation.SCHEMA];
-
-        if (method) {
-          return method(...args);
-        }
-
-        return super.visitSchema(...args);
-      }
-
-      public visitScalar(...args: Parameters<SchemaDirectiveVisitor['visitScalar']>) {
-        const method = directive.directiveMap[DirectiveLocation.SCALAR];
-
-        if (method) {
-          return method(...args);
-        }
-
-        return super.visitScalar(...args);
-      }
-
-      public visitObject(...args: Parameters<SchemaDirectiveVisitor['visitObject']>) {
-        const method = directive.directiveMap[DirectiveLocation.OBJECT];
-
-        if (method) {
-          return method(...args);
-        }
-
-        return super.visitObject(...args);
-      }
-
-      public visitFieldDefinition(
-        ...args: Parameters<SchemaDirectiveVisitor['visitFieldDefinition']>
-      ) {
-        const method = directive.directiveMap[DirectiveLocation.FIELD_DEFINITION];
-
-        if (method) {
-          return method(args[0]);
-        }
-
-        return super.visitFieldDefinition(...args);
-      }
-
-      public visitArgumentDefinition(
-        ...args: Parameters<SchemaDirectiveVisitor['visitArgumentDefinition']>
-      ) {
-        const method = directive.directiveMap[DirectiveLocation.ARGUMENT_DEFINITION];
-
-        if (method) {
-          return method(args[0]);
-        }
-
-        return super.visitArgumentDefinition(...args);
-      }
-
-      public visitInterface(...args: Parameters<SchemaDirectiveVisitor['visitInterface']>) {
-        const method = directive.directiveMap[DirectiveLocation.INTERFACE];
-
-        if (method) {
-          return method(...args);
-        }
-
-        return super.visitInterface(...args);
-      }
-
-      public visitUnion(...args: Parameters<SchemaDirectiveVisitor['visitUnion']>) {
-        const method = directive.directiveMap[DirectiveLocation.UNION];
-
-        if (method) {
-          return method(...args);
-        }
-
-        return super.visitUnion(...args);
-      }
-
-      public visitEnum(...args: Parameters<SchemaDirectiveVisitor['visitEnum']>) {
-        const method = directive.directiveMap[DirectiveLocation.ENUM];
-
-        if (method) {
-          return method(...args);
-        }
-
-        return super.visitEnum(...args);
-      }
-
-      public visitEnumValue(...args: Parameters<SchemaDirectiveVisitor['visitEnumValue']>) {
-        const method = directive.directiveMap[DirectiveLocation.ENUM_VALUE];
-
-        if (method) {
-          return method(args[0]);
-        }
-
-        return super.visitEnumValue(...args);
-      }
-
-      public visitInputObject(...args: Parameters<SchemaDirectiveVisitor['visitInputObject']>) {
-        const method = directive.directiveMap[DirectiveLocation.INPUT_OBJECT];
-
-        if (method) {
-          return method(...args);
-        }
-
-        return super.visitInputObject(...args);
-      }
-
-      public visitInputFieldDefinition(
-        ...args: Parameters<SchemaDirectiveVisitor['visitInputFieldDefinition']>
-      ) {
-        const method = directive.directiveMap[DirectiveLocation.INPUT_FIELD_DEFINITION];
-
-        if (method) {
-          return method(args[0]);
-        }
-
-        return super.visitInputFieldDefinition(...args);
-      }
-    };
-
-    return directive.names.map((name) => [name, ApolloClass] as [string, typeof ApolloClass]);
   }
 }

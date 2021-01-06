@@ -3,7 +3,7 @@ import { UserRepository } from '../../../domain/repository/user-repository';
 import { Username } from '../../../domain/value-object/username';
 import { UserMapper } from '../../mapper/user-mapper';
 import { UserNotFoundError } from './get-user-by-username-errors';
-import { Feature } from '~lib/application/types';
+import { Query } from '~lib/application/types';
 
 interface GetUserByUsernameQueryDependencies {
   userRepository: UserRepository;
@@ -13,7 +13,7 @@ interface GetUserByUsernameQueryArguments {
   username: string;
 }
 
-export class GetUserByUsernameQuery implements Feature<GetUserByUsernameQueryArguments, UserDTO> {
+export class GetUserByUsernameQuery implements Query<GetUserByUsernameQueryArguments, UserDTO> {
   private readonly userRepository: UserRepository;
 
   public constructor({ userRepository }: GetUserByUsernameQueryDependencies) {

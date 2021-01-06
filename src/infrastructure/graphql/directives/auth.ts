@@ -1,5 +1,4 @@
 /* eslint-disable no-param-reassign */
-import { AuthenticationError, gql } from 'apollo-server-express';
 import {
   defaultFieldResolver,
   DirectiveLocation,
@@ -7,16 +6,16 @@ import {
   GraphQLFieldResolver,
 } from 'graphql';
 import { GraphQLContext } from '../context';
-import { GraphQLDirective } from '~lib/graphql/graphql-directive';
+import { GraphQLDirective } from '~lib/graphql/types';
 
-export class AuthDirective extends GraphQLDirective {
+export class AuthDirective implements GraphQLDirective {
   public names = ['auth'];
 
-  public typeDef = gql`
+  public typeDef = /* GraphQL */ `
     directive @auth on FIELD_DEFINITION
   `;
 
-  public directiveMap = {
+  public transformers = {
     [DirectiveLocation.FIELD_DEFINITION]: <TSource>(
       field: GraphQLField<TSource, GraphQLContext>,
     ) => {
@@ -25,7 +24,7 @@ export class AuthDirective extends GraphQLDirective {
         const context = args[2];
 
         if (!context || !context.user) {
-          throw new AuthenticationError('Not allowed');
+          throw new Error('Not allowed');
         }
 
         return resolve.apply(this, args);
