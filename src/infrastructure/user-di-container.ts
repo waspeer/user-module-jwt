@@ -3,14 +3,14 @@ import { RefreshAccessTokenCommand } from '../application/command/refresh-access
 import { SignInCommand } from '../application/command/sign-in/sign-in-command';
 import { SignOutCommand } from '../application/command/sign-out/sign-out-command';
 import { SignUpCommand } from '../application/command/sign-up/sign-up-command';
+import { GetUserByUsernameQuery } from '../application/query/get-user-by-username/get-user-by-username-query';
 import { UserRepository } from '../domain/repository/user-repository';
 import { UserDomainEventEmitter } from '../event/event-types';
 import { ExpressServer } from './express-server';
 import { Schema } from './graphql/schema';
-import { InMemoryUserRepository } from './repository/inmemory-user-repository';
+import { PrismaUserRepository } from './repository/combined-user-repository';
 import type { Server } from './types';
 import { WinstonLogger } from './winston-logger';
-import { GetUserByUsernameQuery } from 'application/query/get-user-by-username/get-user-by-username-query';
 import type { Command, Query } from '~lib/application/types';
 import { NodeDomainEventEmitter } from '~lib/events/node-domain-event-emitter';
 import { GraphQLSchema } from '~lib/graphql/grapqhl-schema';
@@ -37,7 +37,7 @@ export class UserDIContainer {
       server: asClass<Server>(ExpressServer).singleton(),
 
       // - repository
-      userRepository: asClass<UserRepository>(InMemoryUserRepository),
+      userRepository: asClass<UserRepository>(PrismaUserRepository),
 
       ///
       // APPLICATION

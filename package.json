@@ -14,8 +14,11 @@
     "code:format": "prettier './src/**/**.{js,jsx,ts,tsx}'",
     "code:lint": "eslint --ext .js,.jsx,.ts,.tsx \"src/\"",
     "dev": "nodemon",
+    "docker:start": "docker start user-module-jwt-db user-module-jwt-redis",
+    "docker:stop": "docker stop user-module-jwt-db user-module-jwt-redis",
     "test": "jest",
-    "codegen:graphql-types": "graphql-codegen --config graphql-codegen.yml"
+    "codegen:graphql-types": "graphql-codegen --config graphql-codegen.yml",
+    "predev": "yarn docker:start"
   },
   "husky": {
     "hooks": {
@@ -26,10 +29,12 @@
     "@graphql-codegen/cli": "1.20.0",
     "@graphql-codegen/typescript": "1.20.0",
     "@graphql-codegen/typescript-resolvers": "1.18.1",
+    "@prisma/cli": "2.14.0",
     "@types/bcrypt": "^3.0.0",
     "@types/cookie-parser": "^1.4.2",
     "@types/express": "^4.17.9",
     "@types/faker": "^5.1.5",
+    "@types/ioredis": "^4.17.10",
     "@types/jest": "^26.0.19",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/node": "^14.14.16",
@@ -49,6 +54,7 @@
   "dependencies": {
     "@graphql-tools/schema": "^7.1.2",
     "@graphql-tools/utils": "^7.2.3",
+    "@prisma/client": "2.14.0",
     "awilix": "^4.3.1",
     "bcrypt": "^5.0.0",
     "cookie-parser": "^1.4.5",
@@ -56,6 +62,7 @@
     "express": "^4.17.1",
     "express-graphql": "^0.12.0",
     "graphql": "^15.4.0",
+    "ioredis": "^4.19.4",
     "is-ip": "^3.1.0",
     "jsonwebtoken": "^8.5.1",
     "nanoid": "^3.1.20",

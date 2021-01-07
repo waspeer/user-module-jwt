@@ -26,7 +26,10 @@ export class SignOutResolver extends GraphQLResolver<Result, Parent, Args, Graph
   public async resolve(_parent: Parent, _args: Args, { response, request }: GraphQLContext) {
     const refreshToken = CookieUtil.getRefreshTokenCookie(request);
 
-    await this.signOutCommand.execute({ refreshToken });
+    if (refreshToken) {
+      await this.signOutCommand.execute({ refreshToken });
+    }
+
     CookieUtil.clearRefreshTokenCookie(response);
 
     return {

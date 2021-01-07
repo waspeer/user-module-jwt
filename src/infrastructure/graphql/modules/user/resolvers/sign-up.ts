@@ -1,5 +1,5 @@
 import { SignUpCommand } from '../../../../../application/command/sign-up/sign-up-command';
-import { UserMapper } from '../../../../../application/mapper/user-mapper';
+import { UserMapper } from '../../../../mapper/user-mapper';
 import { UserCreatedEvent, UserEventTypes } from '../../../../../event/event-types';
 import { MutationResolvers } from '../../../graphql-types.gen';
 import { GraphQLContext } from 'infrastructure/graphql/context';
