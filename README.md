@@ -119,4 +119,4 @@ classDef policy fill:pink,color:black
 ## Todo's
 
 -   [ ] Make all events serializable by default - remove serializePayload methods
--   [ ] Make all domain errors custom so they can be catched in application layer
+-   [ ] Make all domain errors custom so they can be catched in application layer &lt;-

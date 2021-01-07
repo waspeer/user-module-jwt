@@ -1,8 +1,8 @@
+import { User } from '../../../domain/entity/user';
 import { UserRepository } from '../../../domain/repository/user-repository';
 import { Username } from '../../../domain/value-object/username';
 import { UserNotFoundError } from './get-user-by-username-errors';
 import { Query } from '~lib/application/types';
-import { User } from '../../../domain/entity/user';
 
 interface GetUserByUsernameQueryDependencies {
   userRepository: UserRepository;

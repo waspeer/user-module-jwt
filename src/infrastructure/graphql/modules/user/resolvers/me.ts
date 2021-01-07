@@ -1,10 +1,10 @@
-import { GraphQLResolver } from '~lib/graphql/graphql-resolver';
-import { ResolverArgs, ResolverParent, ResolverResult } from '~lib/graphql/types';
 import { GetUserByUsernameQuery } from '../../../../../application/query/get-user-by-username/get-user-by-username-query';
 import { UserDTO } from '../../../../../domain/dto/user-dto';
 import { UserMapper } from '../../../../mapper/user-mapper';
 import { GraphQLContext } from '../../../context';
 import { QueryResolvers } from '../../../graphql-types.gen';
+import { GraphQLResolver } from '~lib/graphql/graphql-resolver';
+import { ResolverArgs, ResolverParent, ResolverResult } from '~lib/graphql/types';
 
 interface meResolverDependencies {
   getUserByUsernameQuery: GetUserByUsernameQuery;
