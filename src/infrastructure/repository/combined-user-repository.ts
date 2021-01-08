@@ -1,45 +1,42 @@
-import { PrismaClient } from '@prisma/client';
-import Redis from 'ioredis';
+import { Prisma, PrismaClient, User as PrismaUser } from '@prisma/client';
+import { RefreshToken } from '../../domain/entity/refresh-token';
 import { User } from '../../domain/entity/user';
 import { UserRepository } from '../../domain/repository/user-repository';
+import { Password } from '../../domain/value-object/password';
 import { Username } from '../../domain/value-object/username';
-import { RefreshTokenMapper, StoredRefreshToken } from '../mapper/refresh-token-mapper';
-import { UserMapper } from '../mapper/user-mapper';
+import type { RefreshTokenRepository } from './types';
 import { Identifier } from '~lib/domain/identifier';
-import { getEnvironmentVariable } from '~lib/helpers/get-environment-variable';
+
+interface CombinedUserRepositoryDependencies {
+  refreshTokenRepository: RefreshTokenRepository;
+}
 
 const prisma = new PrismaClient();
-const redis = new Redis(getEnvironmentVariable('REDIS_URL'));
 
-export class PrismaUserRepository implements UserRepository {
+export class CombinedUserRepository implements UserRepository {
+  private readonly refreshTokenRepository: RefreshTokenRepository;
+
+  public constructor({ refreshTokenRepository }: CombinedUserRepositoryDependencies) {
+    this.refreshTokenRepository = refreshTokenRepository;
+  }
+
   public async findByRefreshTokenId(identifier: Identifier) {
-    const tokenKey = `rt:${identifier.value}`;
-    const tokenData = ((await redis.hgetall(tokenKey)) as unknown) as StoredRefreshToken | null;
+    const userIdentifier = await this.refreshTokenRepository.findAssociatedUserIdById(identifier);
 
-    if (!tokenData) {
+    if (!userIdentifier) {
       return undefined;
     }
 
-    const userData = await prisma.user.findUnique({ where: { id: tokenData.userId } });
+    const userData = await prisma.user.findUnique({ where: { id: userIdentifier.value } });
 
     if (!userData) {
       return undefined;
     }
 
-    const userKey = `user:${userData.id}`;
+    const userId = new Identifier(userData.id);
+    const refreshTokens = await this.refreshTokenRepository.getRefreshTokensByUserId(userId);
 
-    await redis.zremrangebyscore(userKey, '-inf', Date.now().toString());
-
-    const refreshTokenKeys = await redis.zrangebyscore(userKey, Date.now(), '+inf');
-    const refreshTokens = await Promise.all(
-      refreshTokenKeys.map(async (refreshTokenKey) => {
-        const tokenData = ((await redis.hgetall(refreshTokenKey)) as unknown) as StoredRefreshToken;
-
-        return RefreshTokenMapper.toDomain(tokenData);
-      }),
-    );
-
-    return UserMapper.toDomain(userData, refreshTokens);
+    return this.mapUserToDomain(userData, refreshTokens);
   }
 
   public async findByUsername(username: Username) {
@@ -49,60 +46,44 @@ export class PrismaUserRepository implements UserRepository {
       return undefined;
     }
 
-    const userKey = `user:${userData.id}`;
+    const userId = new Identifier(userData.id);
+    const refreshTokens = await this.refreshTokenRepository.getRefreshTokensByUserId(userId);
 
-    await redis.zremrangebyscore(userKey, '-inf', Date.now().toString());
-
-    const refreshTokenKeys = await redis.zrangebyscore(userKey, Date.now(), '+inf');
-    const refreshTokens = await Promise.all(
-      refreshTokenKeys.map(async (refreshTokenKey) => {
-        const tokenData = ((await redis.hgetall(refreshTokenKey)) as unknown) as StoredRefreshToken;
-
-        return RefreshTokenMapper.toDomain(tokenData);
-      }),
-    );
-
-    return UserMapper.toDomain(userData, refreshTokens);
+    return this.mapUserToDomain(userData, refreshTokens);
   }
 
   public async store(user: User) {
+    const userData = this.mapUserToPersistence(user);
+
     await prisma.user.upsert({
-      create: UserMapper.toPersistence(user),
-      update: UserMapper.toPersistence(user),
+      create: userData,
+      update: userData,
       where: { id: user.id.value },
     });
 
-    const userKey = `user:${user.id.value}`;
+    await this.refreshTokenRepository.storeRefreshTokensForUser(user);
+  }
 
-    await redis.zremrangebyscore(userKey, '-inf', Date.now().toString());
+  ///
+  // MAPPERS
+  ///
 
-    const refreshTokenKeys = await redis.zrangebyscore(userKey, Date.now(), '+inf');
-    const userTokens = user.refreshTokens.map(({ value }) => value);
-    const tokenKeysToRemove = refreshTokenKeys.filter(
-      (key) => !userTokens.some((userToken) => key.endsWith(userToken)),
+  private mapUserToDomain(user: PrismaUser, refreshTokens: RefreshToken[]): User {
+    return new User(
+      {
+        password: new Password(user.password, { isHashed: true }),
+        username: new Username(user.username),
+        refreshTokens,
+      },
+      new Identifier(user.id),
     );
+  }
 
-    if (tokenKeysToRemove.length) {
-      await redis
-        .multi()
-        .zrem(userKey, ...tokenKeysToRemove)
-        .del(...tokenKeysToRemove)
-        .exec();
-    }
-
-    await Promise.all(
-      user.refreshTokens
-        .map((refreshToken) => RefreshTokenMapper.toPersistence(refreshToken, user))
-        .map(({ fields, expiresAt, refreshTokenKey, userKey }) => {
-          const transaction = redis
-            .multi()
-            .hmset(refreshTokenKey, ...fields)
-            .pexpireat(refreshTokenKey, expiresAt)
-            .zadd(userKey, expiresAt.toString(), refreshTokenKey)
-            .pexpireat(userKey, expiresAt);
-
-          return transaction.exec();
-        }),
-    );
+  private mapUserToPersistence(user: User): Prisma.UserCreateInput {
+    return {
+      id: user.id.value,
+      password: user.password.value,
+      username: user.username.value,
+    };
   }
 }

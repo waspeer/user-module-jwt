@@ -8,7 +8,9 @@ import { UserRepository } from '../domain/repository/user-repository';
 import { UserDomainEventEmitter } from '../event/event-types';
 import { ExpressServer } from './express-server';
 import { Schema } from './graphql/schema';
-import { PrismaUserRepository } from './repository/combined-user-repository';
+import { CombinedUserRepository } from './repository/combined-user-repository';
+import { RedisRefreshTokenRepository } from './repository/redis-refresh-token-repository';
+import { RefreshTokenRepository } from './repository/types';
 import type { Server } from './types';
 import { WinstonLogger } from './winston-logger';
 import type { Command, Query } from '~lib/application/types';
@@ -37,7 +39,8 @@ export class UserDIContainer {
       server: asClass<Server>(ExpressServer).singleton(),
 
       // - repository
-      userRepository: asClass<UserRepository>(PrismaUserRepository),
+      userRepository: asClass<UserRepository>(CombinedUserRepository),
+      refreshTokenRepository: asClass<RefreshTokenRepository>(RedisRefreshTokenRepository),
 
       ///
       // APPLICATION
