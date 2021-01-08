@@ -5,7 +5,6 @@ import { UserNotFoundError } from '../../src/application/command/sign-in/sign-in
 import { RefreshToken } from '../../src/domain/entity/refresh-token';
 import { User } from '../../src/domain/entity/user';
 import { UserSignedInEvent } from '../../src/event/user-signed-in-event';
-import { createDevice } from '../util/create-device';
 import { createMockDomainEventEmitter } from '../util/create-mock-domain-event-emitter';
 import { createMockUserRepository } from '../util/create-mock-user-repository';
 import { createUser } from '../util/create-user';
@@ -23,10 +22,6 @@ describe('Sign In Command', () => {
   });
 
   it('should create new tokens when a refresh token does not exist and dispatch the appropriate events', async () => {
-    const device = createDevice();
-    const ipAddress = device.ipAddress.value;
-    const userAgent = device.userAgent.value;
-
     const password = faker.internet.password();
     const user = createUser({ password });
     const username = user.username.value;
@@ -35,8 +30,9 @@ describe('Sign In Command', () => {
 
     await expect(
       command.execute({
-        device: { ipAddress, userAgent },
+        ipAddress: faker.internet.ip(),
         password,
+        userAgent: faker.internet.userAgent(),
         username,
       }),
     ).resolves.toBeUndefined();
@@ -62,16 +58,12 @@ describe('Sign In Command', () => {
 
     expect(signInEvent.payload).toEqual<UserSignedInEvent['payload']>({
       accessToken: expect.any(String),
-      deviceId: storedRefreshToken.device.id.value,
+      ipAddress: storedRefreshToken.ipAddress.value,
       refreshToken: storedRefreshToken.value,
     });
   });
 
   it('should throw an error when user can not be found', async () => {
-    const device = createDevice();
-    const ipAddress = device.ipAddress.value;
-    const userAgent = device.userAgent.value;
-
     const password = faker.internet.password();
     const username = faker.internet.userName();
 
@@ -79,8 +71,9 @@ describe('Sign In Command', () => {
 
     await expect(
       command.execute({
-        device: { ipAddress, userAgent },
+        ipAddress: faker.internet.ip(),
         password,
+        userAgent: faker.internet.userAgent(),
         username,
       }),
     ).rejects.toBeInstanceOf(UserNotFoundError);

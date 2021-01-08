@@ -3,7 +3,6 @@ import { IpAddress } from '../../../src/domain/value-object/ip-address';
 import { UserAccessTokenRefreshedEvent } from '../../../src/event/user-access-token-refreshed-event';
 import { UserSignedInEvent } from '../../../src/event/user-signed-in-event';
 import { UserSignedOutEvent } from '../../../src/event/user-signed-out-event';
-import { createDevice } from '../../util/create-device';
 import { createRefreshToken } from '../../util/create-refresh-token';
 import { createUser } from '../../util/create-user';
 import { Identifier } from '~lib/domain/identifier';
@@ -17,7 +16,7 @@ describe('User', () => {
 
       expect(() =>
         user.refreshAccessToken({
-          ipAddress: refreshToken.device.ipAddress,
+          ipAddress: refreshToken.ipAddress,
           refreshTokenId: refreshToken.id,
         }),
       ).not.toThrowError();
@@ -34,8 +33,7 @@ describe('User', () => {
     });
 
     it('should throw an error when the IpAddress does not match the one associated with the RefreshToken', () => {
-      const device = createDevice({ ipAddress: '98.139.180.149' });
-      const refreshToken = createRefreshToken({ device });
+      const refreshToken = createRefreshToken({ ipAddress: '98.139.180.149' });
       const user = createUser({ refreshTokens: [refreshToken] });
       const wrongIpAddress = new IpAddress('69.89.31.226');
 
@@ -50,32 +48,49 @@ describe('User', () => {
 
   describe('.signIn', () => {
     it('should throw an error when the provided password does not match', () => {
-      const device = createDevice();
       const user = createUser({ password: 'password' });
+      const refreshToken = createRefreshToken();
       const password = 'other-password';
 
-      expect(() => user.signIn({ password, device })).toThrowError();
+      expect(() =>
+        user.signIn({
+          password,
+          ipAddress: refreshToken.ipAddress,
+          userAgent: refreshToken.userAgent,
+        }),
+      ).toThrowError();
     });
 
     it('should create a refresh token if one is not already present', () => {
-      const device = createDevice();
       const password = 'password';
       const user = createUser({ password });
+      const refreshToken = createRefreshToken();
 
       expect(user.refreshTokens).toBeEmpty();
-      expect(() => user.signIn({ password, device })).not.toThrowError();
+      expect(() =>
+        user.signIn({
+          password,
+          ipAddress: refreshToken.ipAddress,
+          userAgent: refreshToken.userAgent,
+        }),
+      ).not.toThrowError();
       expect(user.refreshTokens).not.toBeEmpty();
       expect(user.events.all).toIncludeAllMembers([expect.any(UserSignedInEvent)]);
     });
 
     it('should extend a token when it matches to provided device instead of creating a new one', () => {
-      const device = createDevice();
-      const existingRefreshToken = createRefreshToken({ device });
+      const existingRefreshToken = createRefreshToken();
       const password = 'password';
       const user = createUser({ password, refreshTokens: [existingRefreshToken] });
 
       expect(user.refreshTokens).toHaveLength(1);
-      expect(() => user.signIn({ password, device })).not.toThrowError();
+      expect(() =>
+        user.signIn({
+          password,
+          ipAddress: existingRefreshToken.ipAddress,
+          userAgent: existingRefreshToken.userAgent,
+        }),
+      ).not.toThrowError();
       expect(user.refreshTokens).toHaveLength(1);
       expect(user.events.all).toIncludeAllMembers([expect.any(UserSignedInEvent)]);
     });

@@ -1,4 +1,3 @@
-import { Device } from '../../../domain/entity/device';
 import type { UserRepository } from '../../../domain/repository/user-repository';
 import { IpAddress } from '../../../domain/value-object/ip-address';
 import { UserAgent } from '../../../domain/value-object/user-agent';
@@ -28,10 +27,6 @@ export class SignInCommand extends UserCommand<SignInCommandArguments> {
   }
 
   public async execute(args: SignInCommandArguments) {
-    const device = new Device({
-      ipAddress: new IpAddress(args.ipAddress),
-      userAgent: new UserAgent(args.userAgent),
-    });
     const username = new Username(args.username);
     const user = await this.userRepository.findByUsername(username);
 
@@ -39,7 +34,9 @@ export class SignInCommand extends UserCommand<SignInCommandArguments> {
       throw new UserNotFoundError(username);
     }
 
-    user.signIn({ password: args.password, device });
+    const ipAddress = new IpAddress(args.ipAddress);
+    const userAgent = new UserAgent(args.userAgent);
+    user.signIn({ password: args.password, ipAddress, userAgent });
 
     await this.userRepository.store(user);
     this.emitEvents(user);

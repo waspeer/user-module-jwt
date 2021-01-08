@@ -16,7 +16,7 @@ export class UserSignedInEvent extends Event<IUserSignedInEvent> {
       aggregate: user,
       payload: {
         accessToken: accessToken.value,
-        deviceId: refreshToken.device.id.value,
+        ipAddress: refreshToken.ipAddress.value,
         refreshToken: refreshToken.value,
       },
       type: UserEventTypes.SignedIn,

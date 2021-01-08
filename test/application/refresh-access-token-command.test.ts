@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { RefreshAccessTokenCommand } from '../../src/application/command/refresh-access-token/refresh-access-token-command';
-import { UserNotFoundError } from '../../src/application/command/refresh-access-token/refresh-access-token-errors';
+import { InvalidRefreshTokenError } from '../../src/application/command/refresh-access-token/refresh-access-token-errors';
 import { RefreshToken } from '../../src/domain/entity/refresh-token';
 import { UserEventTypes } from '../../src/event/event-types';
 import { UserAccessTokenRefreshedEvent } from '../../src/event/user-access-token-refreshed-event';
@@ -30,7 +30,7 @@ describe('Refresh Access Token Command', () => {
 
     await expect(
       command.execute({
-        ipAddress: refreshToken.device.ipAddress.value,
+        ipAddress: refreshToken.ipAddress.value,
         refreshToken: refreshToken.value,
       }),
     ).resolves.toBeUndefined();
@@ -49,7 +49,7 @@ describe('Refresh Access Token Command', () => {
     )!;
 
     expect(refreshEvent.payload.accessToken).toBeString();
-    expect(refreshEvent.payload.deviceId).toBe(refreshToken.device.id.value);
+    expect(refreshEvent.payload.ipAddress).toBe(refreshToken.ipAddress.value);
     expect(refreshEvent.payload.refreshToken).toBe(refreshToken.value);
   });
 
@@ -58,9 +58,9 @@ describe('Refresh Access Token Command', () => {
 
     await expect(
       command.execute({
-        ipAddress: refreshToken.device.ipAddress.value,
+        ipAddress: refreshToken.ipAddress.value,
         refreshToken: refreshToken.value,
       }),
-    ).rejects.toBeInstanceOf(UserNotFoundError);
+    ).rejects.toBeInstanceOf(InvalidRefreshTokenError);
   });
 });

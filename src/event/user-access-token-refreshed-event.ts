@@ -19,7 +19,7 @@ export class UserAccessTokenRefreshedEvent extends Event<IUserAccessTokenRefresh
       aggregate: user,
       payload: {
         accessToken: accessToken.value,
-        deviceId: refreshToken.device.id.value,
+        ipAddress: refreshToken.ipAddress.value,
         refreshToken: refreshToken.value,
       },
       type: UserEventTypes.AccessTokenRefreshed,

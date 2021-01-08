@@ -1,20 +1,27 @@
+import faker from 'faker';
 import { RefreshToken } from '../../../src/domain/entity/refresh-token';
-import { createDevice } from '../../util/create-device';
+import { IpAddress } from '../../../src/domain/value-object/ip-address';
+import { UserAgent } from '../../../src/domain/value-object/user-agent';
 
 describe('Refresh Token', () => {
   describe('.constructor', () => {
     it('should construct with a provided expiresAt date', () => {
-      const device = createDevice();
       const expiresAt = new Date('2020-12-20');
-      const refreshToken = new RefreshToken({ expiresAt, device });
+      const refreshToken = new RefreshToken({
+        expiresAt,
+        ipAddress: new IpAddress(faker.internet.ip()),
+        userAgent: new UserAgent(faker.internet.userAgent()),
+      });
 
       expect(refreshToken.expiresAt).toEqual(expiresAt);
     });
 
     it('should set a default createdAt date', () => {
       // ? This might not always work (1ms difference between createdAt times), but lets try it out
-      const device = createDevice();
-      const refreshToken = new RefreshToken({ device });
+      const refreshToken = new RefreshToken({
+        ipAddress: new IpAddress(faker.internet.ip()),
+        userAgent: new UserAgent(faker.internet.userAgent()),
+      });
       const expectedExpiredAt = new Date(Date.now() + RefreshToken.LIFETIME);
 
       expect(refreshToken.expiresAt).toEqual(expectedExpiredAt);
@@ -23,16 +30,21 @@ describe('Refresh Token', () => {
 
   describe('.isValid', () => {
     it('should return false when token has expired', () => {
-      const device = createDevice();
       const expiresAt = new Date(Date.now() - RefreshToken.LIFETIME);
-      const refreshToken = new RefreshToken({ expiresAt, device });
+      const refreshToken = new RefreshToken({
+        expiresAt,
+        ipAddress: new IpAddress(faker.internet.ip()),
+        userAgent: new UserAgent(faker.internet.userAgent()),
+      });
 
       expect(refreshToken.isValid).toBeFalse();
     });
 
     it('should return true when token has not yet expired', () => {
-      const device = createDevice();
-      const refreshToken = new RefreshToken({ device });
+      const refreshToken = new RefreshToken({
+        ipAddress: new IpAddress(faker.internet.ip()),
+        userAgent: new UserAgent(faker.internet.userAgent()),
+      });
 
       expect(refreshToken.isValid).toBeTrue();
     });
@@ -40,9 +52,12 @@ describe('Refresh Token', () => {
 
   describe('.extend', () => {
     it('should extend the lifetime of the token with the default lifetime', () => {
-      const device = createDevice();
       const initialExpiresAt = new Date(Date.now() + Math.round(RefreshToken.LIFETIME / 2));
-      const refreshToken = new RefreshToken({ device, expiresAt: initialExpiresAt });
+      const refreshToken = new RefreshToken({
+        expiresAt: initialExpiresAt,
+        ipAddress: new IpAddress(faker.internet.ip()),
+        userAgent: new UserAgent(faker.internet.userAgent()),
+      });
 
       expect(refreshToken.isValid).toBeTrue();
       expect(() => refreshToken.extend()).not.toThrowError();
@@ -50,9 +65,12 @@ describe('Refresh Token', () => {
     });
 
     it('should throw an error when the token is already expired', () => {
-      const device = createDevice();
       const expiresAt = new Date(Date.now() - RefreshToken.LIFETIME);
-      const refreshToken = new RefreshToken({ device, expiresAt });
+      const refreshToken = new RefreshToken({
+        expiresAt,
+        ipAddress: new IpAddress(faker.internet.ip()),
+        userAgent: new UserAgent(faker.internet.userAgent()),
+      });
 
       expect(refreshToken.isValid).toBeFalse();
       expect(() => refreshToken.extend()).toThrowError();

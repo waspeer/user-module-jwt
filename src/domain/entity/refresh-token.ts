@@ -1,12 +1,14 @@
 import assert from 'assert';
-import type { Device } from './device';
+import type { IpAddress } from '../value-object/ip-address';
+import type { UserAgent } from '../value-object/user-agent';
 import { Entity } from '~lib/domain/entity';
 import type { Identifier } from '~lib/domain/identifier';
 import type { PickPartial } from '~lib/helpers/helper-types';
 
 interface RefreshTokenProps {
   expiresAt: Date;
-  device: Device;
+  ipAddress: IpAddress;
+  userAgent: UserAgent;
 }
 
 type RefreshTokenConstructorProps = PickPartial<RefreshTokenProps, 'expiresAt'>;
@@ -21,16 +23,20 @@ export class RefreshToken extends Entity<RefreshTokenProps> {
     super({ ...props, expiresAt }, id);
   }
 
-  public get device() {
-    return this.props.device;
-  }
-
   public get expiresAt() {
     return this.props.expiresAt;
   }
 
+  public get ipAddress() {
+    return this.props.ipAddress;
+  }
+
   public get isValid() {
     return this.props.expiresAt.getTime() > Date.now();
+  }
+
+  public get userAgent() {
+    return this.props.userAgent;
   }
 
   public get value() {
@@ -42,5 +48,9 @@ export class RefreshToken extends Entity<RefreshTokenProps> {
     assert(this.isValid, 'Unable to extend RefreshToken: cannot extend an expired token');
 
     this.props.expiresAt = new Date(Date.now() + RefreshToken.LIFETIME);
+  }
+
+  public updateUserAgent(userAgent: UserAgent) {
+    this.props.userAgent = userAgent;
   }
 }

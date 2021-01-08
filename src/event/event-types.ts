@@ -14,7 +14,7 @@ export type UserAccessTokenRefreshedEvent = Event<
   UserEventTypes.AccessTokenRefreshed,
   {
     accessToken: string;
-    deviceId: string;
+    ipAddress: string;
     refreshToken: string;
   }
 >;
@@ -25,7 +25,7 @@ export type UserSignedInEvent = Event<
   UserEventTypes.SignedIn,
   {
     accessToken: string;
-    deviceId: string;
+    ipAddress: string;
     refreshToken: string;
   }
 >;

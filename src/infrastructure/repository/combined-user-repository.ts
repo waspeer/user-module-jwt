@@ -3,7 +3,6 @@ import Redis from 'ioredis';
 import { User } from '../../domain/entity/user';
 import { UserRepository } from '../../domain/repository/user-repository';
 import { Username } from '../../domain/value-object/username';
-import { DeviceMapper } from '../mapper/device-mapper';
 import { RefreshTokenMapper, StoredRefreshToken } from '../mapper/refresh-token-mapper';
 import { UserMapper } from '../mapper/user-mapper';
 import { Identifier } from '~lib/domain/identifier';
@@ -35,13 +34,8 @@ export class PrismaUserRepository implements UserRepository {
     const refreshTokens = await Promise.all(
       refreshTokenKeys.map(async (refreshTokenKey) => {
         const tokenData = ((await redis.hgetall(refreshTokenKey)) as unknown) as StoredRefreshToken;
-        const deviceData = await prisma.device.findUnique({ where: { id: tokenData.deviceId } });
 
-        if (!deviceData) {
-          throw new Error('Wuuuuut'); // TODO
-        }
-
-        return RefreshTokenMapper.toDomain(tokenData, DeviceMapper.toDomain(deviceData));
+        return RefreshTokenMapper.toDomain(tokenData);
       }),
     );
 
@@ -63,13 +57,8 @@ export class PrismaUserRepository implements UserRepository {
     const refreshTokens = await Promise.all(
       refreshTokenKeys.map(async (refreshTokenKey) => {
         const tokenData = ((await redis.hgetall(refreshTokenKey)) as unknown) as StoredRefreshToken;
-        const deviceData = await prisma.device.findUnique({ where: { id: tokenData.deviceId } });
 
-        if (!deviceData) {
-          throw new Error('Wuuuuut'); // TODO
-        }
-
-        return RefreshTokenMapper.toDomain(tokenData, DeviceMapper.toDomain(deviceData));
+        return RefreshTokenMapper.toDomain(tokenData);
       }),
     );
 
@@ -77,22 +66,11 @@ export class PrismaUserRepository implements UserRepository {
   }
 
   public async store(user: User) {
-    const devices = user.refreshTokens.map((refreshToken) => refreshToken.device);
-
-    await prisma.$transaction([
-      prisma.user.upsert({
-        create: UserMapper.toPersistence(user),
-        update: UserMapper.toPersistence(user),
-        where: { id: user.id.value },
-      }),
-      ...devices.map((device) =>
-        prisma.device.upsert({
-          create: DeviceMapper.toPersistence(device),
-          update: DeviceMapper.toPersistence(device),
-          where: { id: device.id.value },
-        }),
-      ),
-    ] as any);
+    await prisma.user.upsert({
+      create: UserMapper.toPersistence(user),
+      update: UserMapper.toPersistence(user),
+      where: { id: user.id.value },
+    });
 
     const userKey = `user:${user.id.value}`;
 

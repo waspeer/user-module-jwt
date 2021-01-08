@@ -119,4 +119,5 @@ classDef policy fill:pink,color:black
 ## Todo's
 
 -   [ ] Make all events serializable by default - remove serializePayload methods
--   [ ] Make all domain errors custom so they can be catched in application layer &lt;-
+-   [ ] Make all domain errors custom so they can be catched in application layer
+-   [ ] Make a config file where all environment variables are imported + move as much config as possible to DIContainer

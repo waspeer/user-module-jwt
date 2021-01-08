@@ -1,7 +1,7 @@
 import type { UserRepository } from '../../../domain/repository/user-repository';
+import type { UserDomainEventEmitter } from '../../../event/event-types';
 import { UserCommand } from '../../types';
 import { UserNotFoundError } from './sign-out-errors';
-import type { UserDomainEventEmitter } from 'event/event-types';
 import { Identifier } from '~lib/domain/identifier';
 
 interface SignOutCommandDependencies {

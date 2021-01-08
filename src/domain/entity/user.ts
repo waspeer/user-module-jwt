@@ -7,8 +7,8 @@ import { UserSignedOutEvent } from '../../event/user-signed-out-event';
 import { AccessToken } from '../value-object/access-token';
 import { IpAddress } from '../value-object/ip-address';
 import { Password } from '../value-object/password';
+import { UserAgent } from '../value-object/user-agent';
 import { Username } from '../value-object/username';
-import { Device } from './device';
 import { RefreshToken } from './refresh-token';
 import { AggregateRoot } from '~lib/domain/aggregate-root';
 import { Identifier } from '~lib/domain/identifier';
@@ -39,8 +39,8 @@ export class User extends AggregateRoot<UserProps, UserEventTypes> {
     return this.props.refreshTokens;
   }
 
-  public findRefreshTokenByDevice(device: Device) {
-    return this.props.refreshTokens.find((token) => token.device.id.equals(device.id));
+  public findRefreshTokenByIpAddress(ipAddress: IpAddress) {
+    return this.props.refreshTokens.find((token) => token.ipAddress.equals(ipAddress));
   }
 
   public findRefreshTokenById(refreshTokenId: Identifier) {
@@ -58,7 +58,7 @@ export class User extends AggregateRoot<UserProps, UserEventTypes> {
 
     assert(refreshToken, 'Unable to refresh access token: could not find refresh token');
     assert(
-      refreshToken.device.ipAddress.equals(ipAddress),
+      refreshToken.ipAddress.equals(ipAddress),
       'Unable to refresh access token: IP address does not match',
     );
 
@@ -67,17 +67,26 @@ export class User extends AggregateRoot<UserProps, UserEventTypes> {
     this.events.add(new UserAccessTokenRefreshedEvent(this, { accessToken, refreshToken }));
   }
 
-  public signIn({ password, device }: { password: string; device: Device }) {
+  public signIn({
+    password,
+    ipAddress,
+    userAgent,
+  }: {
+    password: string;
+    ipAddress: IpAddress;
+    userAgent: UserAgent;
+  }) {
     assert(this.password.equals(password), 'Unable to sign in: invalid credentials');
 
     let refreshToken: RefreshToken;
-    const existingRefreshToken = this.findRefreshTokenByDevice(device);
+    const existingRefreshToken = this.findRefreshTokenByIpAddress(ipAddress);
 
     if (existingRefreshToken) {
       refreshToken = existingRefreshToken;
+      refreshToken.updateUserAgent(userAgent);
       refreshToken.extend();
     } else {
-      refreshToken = new RefreshToken({ device });
+      refreshToken = new RefreshToken({ ipAddress, userAgent });
       this.props.refreshTokens.push(refreshToken);
     }
 
