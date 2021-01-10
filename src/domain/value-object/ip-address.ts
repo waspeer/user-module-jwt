@@ -1,6 +1,6 @@
-import assert from 'assert';
 import isIp from 'is-ip';
 import { ValueObject } from '~lib/domain/value-object';
+import { assert } from '~lib/errors/assert';
 
 export class IpAddress extends ValueObject<string> {
   public constructor(ip: string) {

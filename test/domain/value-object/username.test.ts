@@ -1,4 +1,5 @@
 import { Username } from '../../../src/domain/value-object/username';
+import { DomainError } from '~lib/errors/domain-error';
 
 describe('Username', () => {
   describe('constructor', () => {
@@ -14,7 +15,7 @@ describe('Username', () => {
       const invalidValues = ['', null];
 
       invalidValues.forEach((value) => {
-        expect(() => new Username(value as any)).toThrowError();
+        expect(() => new Username(value as any)).toThrow(DomainError);
       });
     });
 

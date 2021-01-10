@@ -42,7 +42,7 @@ describe('Sign Up Command', () => {
       (event: Event) => event instanceof UserCreatedEvent,
     );
     expect(emittedEvent.aggregateId.equals(storedUser.id)).toBe(true);
-    expect(emittedEvent.payload.user.id.equals(storedUser.id)).toBe(true);
+    expect(emittedEvent.payload.userId).toBe(storedUser.id.value);
 
     // should store before emitting the event
     expect(mockUserRepository.store).toHaveBeenCalledBefore(mockDomainEventEmitter.emit);

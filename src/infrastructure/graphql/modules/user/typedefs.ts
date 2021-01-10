@@ -5,7 +5,7 @@ export const userTypeDefs = /* GraphQL */ `
   }
 
   # ERRORS
-  type AssertionError implements Error {
+  type DomainError implements Error {
     message: String!
   }
 
@@ -28,7 +28,7 @@ export const userTypeDefs = /* GraphQL */ `
 
   union RefreshAccessTokenPayload =
       RefreshAccessTokenSuccessPayload
-    | AssertionError
+    | DomainError
     | InvalidRefreshTokenError
 
   # SIGN IN
@@ -41,14 +41,14 @@ export const userTypeDefs = /* GraphQL */ `
     accessToken: String!
   }
 
-  union SignInPayload = SignInSuccessPayload | AssertionError | UserNotFoundError
+  union SignInPayload = SignInSuccessPayload | DomainError | UserNotFoundError
 
   # SIGN OUT
   type SignOutSuccessPayload {
     _empty: String
   }
 
-  union SignOutPayload = SignOutSuccessPayload | AssertionError | UserNotFoundError
+  union SignOutPayload = SignOutSuccessPayload | DomainError | UserNotFoundError
 
   # SIGN UP
   input SignUpInput {

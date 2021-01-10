@@ -7,7 +7,10 @@ export class UserCreatedEvent extends Event<IUserCreatedEvent> {
   public constructor(user: User) {
     super({
       aggregate: user,
-      payload: { user },
+      payload: {
+        userId: user.id.value,
+        username: user.username.value,
+      },
       type: UserEventTypes.Created,
     });
   }

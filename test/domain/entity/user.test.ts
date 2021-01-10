@@ -6,6 +6,7 @@ import { UserSignedOutEvent } from '../../../src/event/user-signed-out-event';
 import { createRefreshToken } from '../../util/create-refresh-token';
 import { createUser } from '../../util/create-user';
 import { Identifier } from '~lib/domain/identifier';
+import { DomainError } from '~lib/errors/domain-error';
 
 describe('User', () => {
   describe('.refreshAccessToken', () => {
@@ -29,7 +30,7 @@ describe('User', () => {
       const ipAddress = new IpAddress('98.139.180.149');
       const refreshTokenId = new Identifier();
 
-      expect(() => user.refreshAccessToken({ ipAddress, refreshTokenId })).toThrowError();
+      expect(() => user.refreshAccessToken({ ipAddress, refreshTokenId })).toThrow(DomainError);
     });
 
     it('should throw an error when the IpAddress does not match the one associated with the RefreshToken', () => {
@@ -42,7 +43,7 @@ describe('User', () => {
           ipAddress: wrongIpAddress,
           refreshTokenId: refreshToken.id,
         }),
-      ).toThrowError();
+      ).toThrow(DomainError);
     });
   });
 
@@ -58,7 +59,7 @@ describe('User', () => {
           ipAddress: refreshToken.ipAddress,
           userAgent: refreshToken.userAgent,
         }),
-      ).toThrowError();
+      ).toThrow(DomainError);
     });
 
     it('should create a refresh token if one is not already present', () => {
@@ -124,7 +125,7 @@ describe('User', () => {
         user.signOut({
           refreshTokenId: refreshTokenToInvalidate.id,
         }),
-      ).toThrowError();
+      ).toThrow(DomainError);
     });
   });
 });

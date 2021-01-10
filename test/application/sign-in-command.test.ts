@@ -61,6 +61,9 @@ describe('Sign In Command', () => {
       ipAddress: storedRefreshToken.ipAddress.value,
       refreshToken: storedRefreshToken.value,
     });
+
+    // should store before emitting the event
+    expect(mockUserRepository.store).toHaveBeenCalledBefore(mockDomainEventEmitter.emit);
   });
 
   it('should throw an error when user can not be found', async () => {

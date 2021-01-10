@@ -51,6 +51,9 @@ describe('Refresh Access Token Command', () => {
     expect(refreshEvent.payload.accessToken).toBeString();
     expect(refreshEvent.payload.ipAddress).toBe(refreshToken.ipAddress.value);
     expect(refreshEvent.payload.refreshToken).toBe(refreshToken.value);
+
+    // should store before emitting the event
+    expect(mockUserRepository.store).toHaveBeenCalledBefore(mockDomainEventEmitter.emit);
   });
 
   it('should throw an error when the user cannot be found', async () => {

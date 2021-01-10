@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import { Password } from '../../../src/domain/value-object/password';
+import { DomainError } from '~lib/errors/domain-error';
 
 describe('Password', () => {
   describe('plaintext value', () => {
@@ -15,7 +16,7 @@ describe('Password', () => {
       const invalidValues = ['', null];
 
       invalidValues.forEach((value) => {
-        expect(() => new Password(value as any)).toThrowError();
+        expect(() => new Password(value as any)).toThrow(DomainError);
       });
     });
 

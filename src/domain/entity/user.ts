@@ -1,4 +1,3 @@
-import assert from 'assert';
 import { UserEventTypes } from '../../event/event-types';
 import { UserAccessTokenRefreshedEvent } from '../../event/user-access-token-refreshed-event';
 import { UserCreatedEvent } from '../../event/user-created-event';
@@ -12,6 +11,7 @@ import { Username } from '../value-object/username';
 import { RefreshToken } from './refresh-token';
 import { AggregateRoot } from '~lib/domain/aggregate-root';
 import { Identifier } from '~lib/domain/identifier';
+import { assert } from '~lib/errors/assert';
 import { PickPartial } from '~lib/helpers/helper-types';
 
 interface UserProps {
@@ -56,7 +56,10 @@ export class User extends AggregateRoot<UserProps, UserEventTypes> {
   }) {
     const refreshToken = this.findRefreshTokenById(refreshTokenId);
 
-    assert(refreshToken, 'Unable to refresh access token: could not find refresh token');
+    assert(
+      refreshToken,
+      'Unable to refresh access token: refresh token expired or does not belong to this user',
+    );
     assert(
       refreshToken.ipAddress.equals(ipAddress),
       'Unable to refresh access token: IP address does not match',
@@ -97,7 +100,10 @@ export class User extends AggregateRoot<UserProps, UserEventTypes> {
   public signOut({ refreshTokenId }: { refreshTokenId: Identifier }) {
     const refreshTokenToInvalidate = this.findRefreshTokenById(refreshTokenId);
 
-    assert(refreshTokenToInvalidate, 'Unable to sign out user: can not find refresh token');
+    assert(
+      refreshTokenToInvalidate,
+      'Unable to sign out user: refresh token already expired or does not belong to this user',
+    );
 
     this.props.refreshTokens = this.props.refreshTokens.filter(
       (token) => token !== refreshTokenToInvalidate,

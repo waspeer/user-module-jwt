@@ -1,8 +1,8 @@
-import assert from 'assert';
 import type { IpAddress } from '../value-object/ip-address';
 import type { UserAgent } from '../value-object/user-agent';
 import { Entity } from '~lib/domain/entity';
 import type { Identifier } from '~lib/domain/identifier';
+import { assert } from '~lib/errors/assert';
 import type { PickPartial } from '~lib/helpers/helper-types';
 
 interface RefreshTokenProps {

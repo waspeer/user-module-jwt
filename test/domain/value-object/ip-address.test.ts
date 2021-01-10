@@ -1,4 +1,5 @@
 import { IpAddress } from '../../../src/domain/value-object/ip-address';
+import { DomainError } from '~lib/errors/domain-error';
 
 describe('Ip Address', () => {
   it('should construct when provided with a valid value', () => {
@@ -21,7 +22,7 @@ describe('Ip Address', () => {
     ];
 
     invalidIps.forEach((ip) => {
-      expect(() => new IpAddress(ip)).toThrowError();
+      expect(() => new IpAddress(ip)).toThrow(DomainError);
     });
   });
 });

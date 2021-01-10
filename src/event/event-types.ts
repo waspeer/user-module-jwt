@@ -1,4 +1,3 @@
-import { User } from '../domain/entity/user';
 import type { DomainEventEmitter, Event } from '~lib/events/types';
 
 export enum UserEventTypes {
@@ -19,7 +18,13 @@ export type UserAccessTokenRefreshedEvent = Event<
   }
 >;
 
-export type UserCreatedEvent = Event<UserEventTypes.Created, { user: User }>;
+export type UserCreatedEvent = Event<
+  UserEventTypes.Created,
+  {
+    userId: string;
+    username: string;
+  }
+>;
 
 export type UserSignedInEvent = Event<
   UserEventTypes.SignedIn,

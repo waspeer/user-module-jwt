@@ -1,10 +1,9 @@
 import { SignUpCommand } from '../../../../../application/command/sign-up/sign-up-command';
-import { UserMapper } from '../../../../../application/mapper/user-mapper';
 import { UserCreatedEvent, UserEventTypes } from '../../../../../event/event-types';
 import { MutationResolvers } from '../../../graphql-types.gen';
 import { GraphQLContext } from 'infrastructure/graphql/context';
 import { GraphQLResolver } from '~lib/graphql/graphql-resolver';
-import { ResolverResult, ResolverParent, ResolverArgs } from '~lib/graphql/types';
+import { ResolverArgs, ResolverParent, ResolverResult } from '~lib/graphql/types';
 
 interface SignUpResolverDependencies {
   signUpCommand: SignUpCommand;
@@ -37,7 +36,9 @@ export class SignUpResolver extends GraphQLResolver<Result, Parent, Args, GraphQ
 
     return {
       __typename: 'SignUpSuccessPayload' as const,
-      user: UserMapper.toDTO(createdEvent.payload.user),
+      user: {
+        username: createdEvent.payload.username,
+      },
     };
   }
 }

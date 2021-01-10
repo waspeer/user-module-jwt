@@ -1,4 +1,5 @@
 import { UserAgent } from '../../../src/domain/value-object/user-agent';
+import { DomainError } from '~lib/errors/domain-error';
 
 describe('User Agent', () => {
   it('should construct when provided with a valid value', () => {
@@ -18,7 +19,7 @@ describe('User Agent', () => {
     const invalidValues = ['', null];
 
     invalidValues.forEach((value) => {
-      expect(() => new UserAgent(value as any)).toThrowError();
+      expect(() => new UserAgent(value as any)).toThrow(DomainError);
     });
   });
 

@@ -40,6 +40,9 @@ describe('Sign Out Command', () => {
     expect(mockDomainEventEmitter.emit).toHaveBeenCalledWith(
       expect.arrayContaining([expect.any(UserSignedOutEvent)]),
     );
+
+    // should store before emitting the event
+    expect(mockUserRepository.store).toHaveBeenCalledBefore(mockDomainEventEmitter.emit);
   });
 
   it('should throw an error if a user can not be found', async () => {

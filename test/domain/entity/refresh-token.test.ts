@@ -2,6 +2,7 @@ import faker from 'faker';
 import { RefreshToken } from '../../../src/domain/entity/refresh-token';
 import { IpAddress } from '../../../src/domain/value-object/ip-address';
 import { UserAgent } from '../../../src/domain/value-object/user-agent';
+import { DomainError } from '~lib/errors/domain-error';
 
 describe('Refresh Token', () => {
   describe('.constructor', () => {
@@ -73,7 +74,7 @@ describe('Refresh Token', () => {
       });
 
       expect(refreshToken.isValid).toBeFalse();
-      expect(() => refreshToken.extend()).toThrowError();
+      expect(() => refreshToken.extend()).toThrow(DomainError);
     });
   });
 });
