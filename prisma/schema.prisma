@@ -14,15 +14,3 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
-model Device {
-  id String @id
-  browserName String?
-  model String?
-  os String?
-  type String?
-  userAgent String
-  vendor String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
