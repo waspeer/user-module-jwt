@@ -1,10 +1,10 @@
 # User Module JWT
 
-This is a module for user management/authentication. This is made for educational purposes.
+This is a module for user management/authentication. This is made for educational purposes, not be used in production.
 
 ## Setting up the development database
 
-You can use Docker to set up the database in development with the following command:
+You can use Docker to set up the database in development with the following commands. These commands only need to run once. Afterwards running `yarn dev` will automatically start these containers.
 
 ```sh
 docker run \
@@ -23,57 +23,13 @@ docker run \
   -d redis:6-alpine
 ```
 
-This wil create a postgres 12 container accesible at localhost port `5000`. This command only needs to be run once. Afterward running `yarn dev` will reuse this container.
-
 ## Stories
 
 -   [x] A user can be created (signed up) by providing a username and password (additional information might be added later)
 -   [x] A user can exchange its credentials (username and password) for an access token and a refresh token (sign in)
 -   [x] A user can exchange its refresh token for a new access token (refresh token)
 -   [x] A user can invalidate its refresh token (sign out)
--   [x] The user information of the currently logged in user can be queried (get user by id &lt;-- access token)
-
-```mermaid
-classDiagram
-
-Token <|-- AccessToken: implements
-Token <|-- RefreshToken: implements
-User "1" --> "*" RefreshToken
-RefreshToken "1" --> "1" Device
-
-class User {
-  <<aggregate>>
-  string username
-  string password
-
-  createAccessToken(RefreshToken refreshToken) AccessToken
-  signIn(string password) RefreshToken
-  signOut() void
-}
-
-class Token {
-  <<interface>>
-  string value
-  date expiresAt
-
-  isValid() boolean
-}
-class AccessToken
-class RefreshToken {
-  Device device
-}
-
-class UserTokens {
-  <<interface>>
-  AccessToken accessToken
-  RefreshToken refreshToken
-}
-
-class Device {
-  string ipAddress
-  string userAgent
-}
-```
+-   [x] The user information of the currently logged in user can be queried (get user by username &lt;-- access token)
 
 ```mermaid
 graph LR
@@ -115,9 +71,3 @@ classDef command fill:steelblue
 classDef event fill:gold,color:black
 classDef policy fill:pink,color:black
 ```
-
-## Todo's
-
--   [x] Make all events serializable by default - remove serializePayload methods
--   [x] Make all domain errors custom so they can be catched in application layer
--   [?] Make a config file where all environment variables are imported + move as much config as possible to DIContainer
