@@ -57,14 +57,14 @@ export const userTypeDefs = /* GraphQL */ `
   }
 
   type SignUpSuccessPayload {
-    user: User
+    user: User!
   }
 
   union SignUpPayload = SignUpSuccessPayload | UsernameAlreadyTakenError
 
   # ROOT TYPES
   extend type Mutation {
-    refreshAccessToken: RefreshAccessTokenPayload! @auth
+    refreshAccessToken: RefreshAccessTokenPayload!
     signIn(input: SignInInput!): SignInPayload!
     signOut: SignOutPayload!
     signUp(input: SignUpInput!): SignUpPayload!
